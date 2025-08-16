@@ -23,6 +23,7 @@
                         </div>
                     </div>
                 </div>
+                {% if session.username == 'admin' %}
                 <div class="col-md-6">
                     <div class="card bg-success text-white">
                         <div class="card-body text-center">
@@ -34,6 +35,20 @@
                         </div>
                     </div>
                 </div>
+                {% else %}
+                <div class="col-md-6">
+                    <div class="card bg-warning text-dark">
+                        <div class="card-body text-center">
+                            <i class="fas fa-lock fa-3x mb-3"></i>
+                            <h5>Gestión de Usuarios</h5>
+                            <p class="small mb-3">Solo disponible para administradores</p>
+                            <button class="btn btn-outline-secondary" disabled>
+                                <i class="fas fa-user-plus"></i> Crear Usuario
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
             </div>
             
             <!-- Projects Management -->
@@ -94,7 +109,8 @@
                 </div>
             </div>
             
-            <!-- Users Management -->
+            <!-- Users Management - Solo para Admin -->
+            {% if session.username == 'admin' %}
             <div class="card">
                 <div class="card-header">
                     <h5 class="mb-0">
@@ -139,6 +155,17 @@
                     {% endif %}
                 </div>
             </div>
+            {% else %}
+            <!-- Mensaje para usuarios no admin -->
+            <div class="card bg-light">
+                <div class="card-body text-center py-5">
+                    <i class="fas fa-user-shield fa-4x text-muted mb-3"></i>
+                    <h4 class="text-muted">¡Bienvenido {{ session.username }}!</h4>
+                    <p class="lead text-muted">Como usuario del sistema, puedes gestionar proyectos completamente.</p>
+                    <p class="text-muted">La gestión de usuarios está reservada para el administrador del sistema.</p>
+                </div>
+            </div>
+            {% endif %}
         </div>
     </div>
 </div>

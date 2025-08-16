@@ -33,14 +33,25 @@ Preferred communication style: Simple, everyday language.
 ### Authentication & Authorization
 - **Authentication Method**: Session-based authentication using Flask sessions
 - **Password Security**: Werkzeug password hashing for secure credential storage
-- **Access Control**: Login required decorators for administrative functions
-- **User Management**: Admin-only user creation (no public registration)
+- **Access Control**: 
+  - Login required decorators for administrative functions
+  - Admin-only decorators for user management operations
+  - Role-based access: Only 'admin' user can manage other users
+- **User Management**: Admin-only user creation and management (no public registration)
+- **User Roles**: 
+  - Admin: Full access to users and projects
+  - Regular Users: Project management only
 
 ### Project Management
-- **Image Handling**: Direct BLOB storage in SQLite database
-- **File Upload**: Werkzeug secure filename processing
+- **Image Handling**: Direct BLOB storage in SQLite database with base64 conversion for display
+- **File Upload**: Enhanced drag-and-drop interface with live preview functionality
 - **CRUD Operations**: Full create, read, update, delete functionality for projects
 - **Public Display**: All projects visible to public users without authentication
+- **Enhanced UI**: 
+  - Clickable project cards with hover effects
+  - Detailed project view with image modal and comprehensive information
+  - Enriched project creation form with live preview and drag-and-drop upload
+  - Character counter and real-time form validation
 
 ## External Dependencies
 

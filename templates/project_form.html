@@ -5,91 +5,330 @@
 {% block content %}
 <div class="container">
     <div class="row justify-content-center">
-        <div class="col-lg-8">
-            <div class="card shadow">
-                <div class="card-header bg-primary text-white">
-                    <h4 class="mb-0">
-                        <i class="fas fa-project-diagram"></i> {{ action }} Proyecto
-                    </h4>
+        <div class="col-lg-10">
+            <!-- Header Section -->
+            <div class="form-header text-center mb-5">
+                <h1 class="display-5 text-primary mb-3">
+                    <i class="fas fa-rocket"></i> {{ action }} Proyecto
+                </h1>
+                <p class="lead text-muted">
+                    {% if action == 'Crear' %}
+                        Crea un nuevo proyecto para nuestra misión victoriosa
+                    {% else %}
+                        Actualiza la información de tu proyecto
+                    {% endif %}
+                </p>
+            </div>
+            
+            <div class="row">
+                <!-- Form Section -->
+                <div class="col-lg-8">
+                    <div class="card shadow-lg border-0">
+                        <div class="card-header bg-gradient-primary text-white">
+                            <h4 class="mb-0">
+                                <i class="fas fa-edit"></i> Información del Proyecto
+                            </h4>
+                        </div>
+                        <div class="card-body p-5">
+                            <form method="POST" enctype="multipart/form-data" id="projectForm">
+                                <!-- Título -->
+                                <div class="form-group mb-4">
+                                    <label for="titulo" class="form-label fw-bold">
+                                        <i class="fas fa-heading text-primary me-2"></i>Título del Proyecto *
+                                    </label>
+                                    <input type="text" 
+                                           class="form-control form-control-lg" 
+                                           id="titulo" 
+                                           name="titulo" 
+                                           value="{% if project %}{{ project.titulo }}{% endif %}"
+                                           placeholder="Ej: Centro Comunitario Sostenible"
+                                           required>
+                                    <div class="form-text">
+                                        <i class="fas fa-info-circle"></i> Elige un título descriptivo y atractivo
+                                    </div>
+                                </div>
+                                
+                                <!-- Descripción -->
+                                <div class="form-group mb-4">
+                                    <label for="descripcion" class="form-label fw-bold">
+                                        <i class="fas fa-align-left text-primary me-2"></i>Descripción del Proyecto *
+                                    </label>
+                                    <textarea class="form-control" 
+                                              id="descripcion" 
+                                              name="descripcion" 
+                                              rows="6" 
+                                              placeholder="Describe detalladamente el proyecto, sus objetivos, beneficiarios y impacto esperado..."
+                                              required>{% if project %}{{ project.descripcion }}{% endif %}</textarea>
+                                    <div class="form-text">
+                                        <i class="fas fa-info-circle"></i> Incluye objetivos, beneficiarios y el impacto esperado
+                                    </div>
+                                    <div class="character-counter mt-2">
+                                        <small class="text-muted">
+                                            Caracteres: <span id="charCount">0</span>
+                                        </small>
+                                    </div>
+                                </div>
+                                
+                                <!-- Imagen -->
+                                <div class="form-group mb-4">
+                                    <label for="imagen" class="form-label fw-bold">
+                                        <i class="fas fa-camera text-primary me-2"></i>Imagen del Proyecto
+                                        {% if project %}<span class="text-muted">(opcional - mantener actual si no se selecciona)</span>{% endif %}
+                                    </label>
+                                    <div class="upload-area" id="uploadArea">
+                                        <input type="file" 
+                                               class="form-control" 
+                                               id="imagen" 
+                                               name="imagen" 
+                                               accept="image/*"
+                                               hidden>
+                                        <div class="upload-content text-center p-4">
+                                            <i class="fas fa-cloud-upload-alt fa-3x text-primary mb-3"></i>
+                                            <h5>Arrastra una imagen aquí</h5>
+                                            <p class="text-muted">o</p>
+                                            <button type="button" class="btn btn-outline-primary" onclick="document.getElementById('imagen').click()">
+                                                <i class="fas fa-folder-open"></i> Seleccionar Archivo
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="form-text">
+                                        <i class="fas fa-info-circle"></i> Formatos: JPG, PNG, GIF. Tamaño máximo: 5MB
+                                    </div>
+                                </div>
+                                
+                                <!-- Botones de Acción -->
+                                <div class="form-actions d-flex justify-content-between align-items-center mt-5">
+                                    <a href="{{ url_for('admin') }}" class="btn btn-outline-secondary btn-lg">
+                                        <i class="fas fa-arrow-left"></i> Cancelar
+                                    </a>
+                                    <button type="submit" class="btn btn-primary btn-lg px-5" id="submitBtn">
+                                        <i class="fas fa-save"></i> {{ action }} Proyecto
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
                 </div>
-                <div class="card-body p-4">
-                    <form method="POST" enctype="multipart/form-data">
-                        <div class="mb-3">
-                            <label for="titulo" class="form-label">Título del Proyecto *</label>
-                            <input type="text" 
-                                   class="form-control" 
-                                   id="titulo" 
-                                   name="titulo" 
-                                   value="{% if project %}{{ project.titulo }}{% endif %}"
-                                   required>
+                
+                <!-- Preview Section -->
+                <div class="col-lg-4">
+                    <div class="card shadow border-0 sticky-top">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0">
+                                <i class="fas fa-eye text-primary"></i> Vista Previa
+                            </h5>
                         </div>
-                        
-                        <div class="mb-3">
-                            <label for="descripcion" class="form-label">Descripción *</label>
-                            <textarea class="form-control" 
-                                      id="descripcion" 
-                                      name="descripcion" 
-                                      rows="5" 
-                                      required>{% if project %}{{ project.descripcion }}{% endif %}</textarea>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label for="imagen" class="form-label">
-                                Imagen del Proyecto 
-                                {% if project %}(dejar vacío para mantener la actual){% endif %}
-                            </label>
-                            <input type="file" 
-                                   class="form-control" 
-                                   id="imagen" 
-                                   name="imagen" 
-                                   accept="image/*">
-                            <div class="form-text">
-                                Formatos soportados: JPG, PNG, GIF. Tamaño máximo recomendado: 5MB
+                        <div class="card-body">
+                            <div class="preview-content">
+                                <div class="preview-image mb-3" id="previewImage">
+                                    <div class="placeholder-image">
+                                        <i class="fas fa-image fa-3x text-muted"></i>
+                                        <p class="small text-muted mt-2">Imagen del proyecto</p>
+                                    </div>
+                                </div>
+                                <h6 class="preview-title text-primary" id="previewTitle">
+                                    {% if project %}{{ project.titulo }}{% else %}Título del Proyecto{% endif %}
+                                </h6>
+                                <p class="preview-description text-muted small" id="previewDescription">
+                                    {% if project %}{{ project.descripcion[:100] }}...{% else %}La descripción aparecerá aquí conforme escribas...{% endif %}
+                                </p>
+                            </div>
+                            
+                            <!-- Project Info -->
+                            <div class="project-info mt-4 p-3 bg-light rounded">
+                                <h6 class="text-primary mb-3">
+                                    <i class="fas fa-info-circle"></i> Consejos
+                                </h6>
+                                <ul class="list-unstyled small">
+                                    <li class="mb-2">
+                                        <i class="fas fa-check text-success me-2"></i>
+                                        Usa un título claro y memorable
+                                    </li>
+                                    <li class="mb-2">
+                                        <i class="fas fa-check text-success me-2"></i>
+                                        Describe el impacto esperado
+                                    </li>
+                                    <li class="mb-2">
+                                        <i class="fas fa-check text-success me-2"></i>
+                                        Incluye una imagen representativa
+                                    </li>
+                                    <li>
+                                        <i class="fas fa-check text-success me-2"></i>
+                                        Menciona a los beneficiarios
+                                    </li>
+                                </ul>
                             </div>
                         </div>
-                        
-                        <div class="d-flex justify-content-between">
-                            <a href="{{ url_for('admin') }}" class="btn btn-secondary">
-                                <i class="fas fa-arrow-left"></i> Cancelar
-                            </a>
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-save"></i> {{ action }} Proyecto
-                            </button>
-                        </div>
-                    </form>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
+<style>
+.form-header {
+    background: linear-gradient(135deg, var(--light-blue) 0%, var(--light-yellow) 100%);
+    padding: 3rem 0;
+    border-radius: 15px;
+    margin-bottom: 2rem;
+}
+
+.bg-gradient-primary {
+    background: linear-gradient(135deg, var(--primary-blue) 0%, #42A5F5 100%);
+}
+
+.upload-area {
+    border: 2px dashed var(--medium-gray);
+    border-radius: 12px;
+    background: var(--light-gray);
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.upload-area:hover {
+    border-color: var(--primary-blue);
+    background: var(--light-blue);
+}
+
+.upload-area.dragover {
+    border-color: var(--primary-blue);
+    background: var(--light-blue);
+    transform: scale(1.02);
+}
+
+.preview-image {
+    height: 150px;
+    background: var(--light-gray);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.placeholder-image {
+    text-align: center;
+    color: var(--medium-gray);
+}
+
+.preview-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.sticky-top {
+    top: 90px;
+}
+
+.form-control-lg {
+    padding: 15px 20px;
+    font-size: 1.1rem;
+}
+
+.character-counter {
+    text-align: right;
+}
+
+.project-info {
+    border-left: 4px solid var(--primary-blue);
+}
+</style>
+
 <script>
-// Preview uploaded image
-document.getElementById('imagen').addEventListener('change', function(e) {
-    const file = e.target.files[0];
-    if (file) {
+document.addEventListener('DOMContentLoaded', function() {
+    const tituloInput = document.getElementById('titulo');
+    const descripcionInput = document.getElementById('descripcion');
+    const imagenInput = document.getElementById('imagen');
+    const uploadArea = document.getElementById('uploadArea');
+    const previewTitle = document.getElementById('previewTitle');
+    const previewDescription = document.getElementById('previewDescription');
+    const previewImage = document.getElementById('previewImage');
+    const charCount = document.getElementById('charCount');
+
+    // Live preview for title
+    tituloInput.addEventListener('input', function() {
+        const value = this.value || 'Título del Proyecto';
+        previewTitle.textContent = value;
+    });
+
+    // Live preview for description with character count
+    descripcionInput.addEventListener('input', function() {
+        const value = this.value;
+        charCount.textContent = value.length;
+        
+        const preview = value || 'La descripción aparecerá aquí conforme escribas...';
+        previewDescription.textContent = preview.length > 100 ? preview.substring(0, 100) + '...' : preview;
+    });
+
+    // Initialize character count
+    charCount.textContent = descripcionInput.value.length;
+
+    // Drag and drop functionality
+    uploadArea.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        this.classList.add('dragover');
+    });
+
+    uploadArea.addEventListener('dragleave', function(e) {
+        e.preventDefault();
+        this.classList.remove('dragover');
+    });
+
+    uploadArea.addEventListener('drop', function(e) {
+        e.preventDefault();
+        this.classList.remove('dragover');
+        
+        const files = e.dataTransfer.files;
+        if (files.length > 0 && files[0].type.startsWith('image/')) {
+            imagenInput.files = files;
+            previewUploadedImage(files[0]);
+        }
+    });
+
+    // Click to select file
+    uploadArea.addEventListener('click', function() {
+        imagenInput.click();
+    });
+
+    // File input change
+    imagenInput.addEventListener('change', function(e) {
+        if (e.target.files.length > 0) {
+            previewUploadedImage(e.target.files[0]);
+        }
+    });
+
+    function previewUploadedImage(file) {
         const reader = new FileReader();
         reader.onload = function(e) {
-            // Remove existing preview if any
-            const existingPreview = document.getElementById('imagePreview');
-            if (existingPreview) {
-                existingPreview.remove();
-            }
+            previewImage.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
             
-            // Create new preview
-            const preview = document.createElement('div');
-            preview.id = 'imagePreview';
-            preview.className = 'mt-3 text-center';
-            preview.innerHTML = `
-                <p class="small text-muted">Vista previa:</p>
-                <img src="${e.target.result}" class="img-thumbnail" style="max-height: 200px;">
+            // Update upload area to show selected file
+            uploadArea.innerHTML = `
+                <div class="upload-content text-center p-4">
+                    <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
+                    <h5 class="text-success">Imagen seleccionada</h5>
+                    <p class="text-muted">${file.name}</p>
+                    <button type="button" class="btn btn-outline-primary btn-sm" onclick="changeImage()">
+                        <i class="fas fa-exchange-alt"></i> Cambiar Imagen
+                    </button>
+                </div>
             `;
-            
-            // Insert after the file input
-            document.getElementById('imagen').parentNode.appendChild(preview);
         };
         reader.readAsDataURL(file);
     }
+
+    // Form validation
+    document.getElementById('projectForm').addEventListener('submit', function(e) {
+        const submitBtn = document.getElementById('submitBtn');
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+        submitBtn.disabled = true;
+    });
 });
+
+function changeImage() {
+    document.getElementById('imagen').click();
+}
 </script>
 {% endblock %}

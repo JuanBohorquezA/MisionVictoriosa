@@ -1,0 +1,251 @@
+{% extends "base.html" %}
+
+{% block title %}{{ project.titulo }} - Misión Victoriosa{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <!-- Back Button -->
+            <div class="mb-4">
+                <a href="{{ url_for('index') }}#proyectos" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left"></i> Volver a Proyectos
+                </a>
+            </div>
+            
+            <!-- Project Header -->
+            <div class="project-header mb-5">
+                <div class="row align-items-center">
+                    <div class="col-lg-8">
+                        <h1 class="display-4 text-primary mb-3">{{ project.titulo }}</h1>
+                        {% if is_authenticated %}
+                            <div class="admin-actions mb-3">
+                                <a href="{{ url_for('edit_project', project_id=project.id) }}" 
+                                   class="btn btn-outline-primary me-2">
+                                    <i class="fas fa-edit"></i> Editar Proyecto
+                                </a>
+                                <form method="POST" action="{{ url_for('delete_project', project_id=project.id) }}" 
+                                      style="display: inline;" 
+                                      onsubmit="return confirm('¿Está seguro de eliminar este proyecto?')">
+                                    <button type="submit" class="btn btn-outline-danger">
+                                        <i class="fas fa-trash"></i> Eliminar
+                                    </button>
+                                </form>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="col-lg-4 text-center">
+                        <div class="project-stats">
+                            <div class="stat-item">
+                                <i class="fas fa-calendar-alt fa-2x text-primary mb-2"></i>
+                                <h6>Proyecto #{{ project.id }}</h6>
+                                <p class="small text-muted">ID del Proyecto</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Project Content -->
+            <div class="row">
+                <!-- Project Image -->
+                <div class="col-lg-6 mb-4">
+                    <div class="project-image-container">
+                        {% if project.imagen_base64 %}
+                            <img src="{{ project.imagen_base64 }}" 
+                                 class="img-fluid rounded shadow-lg project-main-image" 
+                                 alt="{{ project.titulo }}"
+                                 onclick="openImageModal(this.src)">
+                            <div class="image-overlay">
+                                <i class="fas fa-expand fa-2x"></i>
+                                <p class="mb-0">Click para ampliar</p>
+                            </div>
+                        {% else %}
+                            <div class="no-image-placeholder">
+                                <i class="fas fa-image fa-5x text-muted mb-3"></i>
+                                <h5 class="text-muted">Sin imagen disponible</h5>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Project Description -->
+                <div class="col-lg-6 mb-4">
+                    <div class="project-description">
+                        <h3 class="text-primary mb-4">
+                            <i class="fas fa-info-circle"></i> Descripción del Proyecto
+                        </h3>
+                        <div class="description-content">
+                            <p class="lead">{{ project.descripcion }}</p>
+                        </div>
+                        
+                        <!-- Project Features -->
+                        <div class="project-features mt-4">
+                            <h5 class="text-secondary mb-3">
+                                <i class="fas fa-star"></i> Características
+                            </h5>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <div class="feature-item">
+                                        <i class="fas fa-check-circle text-success me-2"></i>
+                                        <span>Proyecto verificado</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <div class="feature-item">
+                                        <i class="fas fa-users text-info me-2"></i>
+                                        <span>Impacto comunitario</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <div class="feature-item">
+                                        <i class="fas fa-leaf text-success me-2"></i>
+                                        <span>Sostenible</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <div class="feature-item">
+                                        <i class="fas fa-lightbulb text-warning me-2"></i>
+                                        <span>Innovador</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Contact Section -->
+            <div class="row mt-5">
+                <div class="col-12">
+                    <div class="contact-cta">
+                        <div class="card bg-primary text-white">
+                            <div class="card-body text-center py-5">
+                                <h3 class="mb-3">¿Interesado en este proyecto?</h3>
+                                <p class="lead mb-4">
+                                    Contáctanos para obtener más información sobre {{ project.titulo }} 
+                                    y cómo puedes participar en nuestra misión.
+                                </p>
+                                <a href="{{ url_for('index') }}#contacto" class="btn btn-light btn-lg">
+                                    <i class="fas fa-envelope"></i> Contáctanos
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Image Modal -->
+<div class="modal fade" id="imageModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">{{ project.titulo }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-0">
+                <img id="modalImage" src="" class="img-fluid w-100" alt="{{ project.titulo }}">
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function openImageModal(imageSrc) {
+    document.getElementById('modalImage').src = imageSrc;
+    var imageModal = new bootstrap.Modal(document.getElementById('imageModal'));
+    imageModal.show();
+}
+</script>
+
+<style>
+.project-header {
+    border-bottom: 3px solid var(--primary-blue);
+    padding-bottom: 2rem;
+}
+
+.project-image-container {
+    position: relative;
+    cursor: pointer;
+    overflow: hidden;
+    border-radius: 12px;
+}
+
+.project-main-image {
+    width: 100%;
+    height: 400px;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.project-image-container:hover .project-main-image {
+    transform: scale(1.05);
+}
+
+.image-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.7);
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.project-image-container:hover .image-overlay {
+    opacity: 1;
+}
+
+.no-image-placeholder {
+    height: 400px;
+    background: var(--light-gray);
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border: 2px dashed var(--medium-gray);
+}
+
+.project-description {
+    height: 100%;
+}
+
+.description-content {
+    background: var(--light-gray);
+    padding: 2rem;
+    border-radius: 12px;
+    border-left: 4px solid var(--primary-blue);
+}
+
+.feature-item {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem 0;
+}
+
+.project-stats {
+    background: var(--light-blue);
+    padding: 2rem;
+    border-radius: 12px;
+    color: var(--dark-gray);
+}
+
+.contact-cta {
+    margin-top: 3rem;
+}
+
+.admin-actions .btn {
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+</style>
+{% endblock %}

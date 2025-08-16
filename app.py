@@ -60,6 +60,19 @@ def login_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
+def admin_required(f):
+    """Decorator to require admin privileges"""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'user_id' not in session:
+            flash('Debe iniciar sesión para acceder a esta página.', 'error')
+            return redirect(url_for('login'))
+        if session.get('username') != 'admin':
+            flash('Solo el administrador puede acceder a esta función.', 'error')
+            return redirect(url_for('admin'))
+        return f(*args, **kwargs)
+    return decorated_function
+
 @app.route('/')
 def index():
     """Home page with public sections"""
@@ -222,7 +235,7 @@ def delete_project(project_id):
     return redirect(url_for('admin'))
 
 @app.route('/admin/user/new', methods=['GET', 'POST'])
-@login_required
+@admin_required
 def new_user():
     """Create new user"""
     if request.method == 'POST':
@@ -282,6 +295,30 @@ def serve_image(project_id):
     else:
         # Return a placeholder or 404
         return '', 404
+
+@app.route('/proyecto/<int:project_id>')
+def project_detail(project_id):
+    """View project details"""
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute('SELECT id, titulo, descripcion, imagen FROM proyectos WHERE id = ?', (project_id,))
+    project = cursor.fetchone()
+    conn.close()
+    
+    if not project:
+        flash('Proyecto no encontrado.', 'error')
+        return redirect(url_for('index'))
+    
+    # Convert BLOB image to base64 for display
+    project_dict = dict(project)
+    if project['imagen']:
+        image_data = base64.b64encode(project['imagen']).decode('utf-8')
+        project_dict['imagen_base64'] = f"data:image/jpeg;base64,{image_data}"
+    else:
+        project_dict['imagen_base64'] = None
+    
+    is_authenticated = 'user_id' in session
+    return render_template('project_detail.html', project=project_dict, is_authenticated=is_authenticated)
 
 if __name__ == '__main__':
     init_db()

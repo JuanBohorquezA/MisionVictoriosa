@@ -10,40 +10,20 @@
 </head>
 <body>
     <!-- Login Button - Always visible on the left -->
-    <div class="login-button-container">
-        {% if session.user_id %}
-            <div class="dropdown">
-                <button class="btn btn-primary dropdown-toggle" type="button" id="userMenu" data-bs-toggle="dropdown">
-                    <i class="fas fa-user"></i> {{ session.username }}
-                </button>
-                <ul class="dropdown-menu">
-                    <li><a class="dropdown-item" href="{{ url_for('admin') }}">
-                        <i class="fas fa-cog"></i> Panel Admin
-                    </a></li>
-                    <li><hr class="dropdown-divider"></li>
-                    <li><a class="dropdown-item" href="{{ url_for('logout') }}">
-                        <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
-                    </a></li>
-                </ul>
-            </div>
-        {% else %}
-            <a href="{{ url_for('login') }}" class="btn btn-primary">
-                <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
-            </a>
-        {% endif %}
-    </div>
-
     <!-- Main Navigation -->
     <nav class="navbar navbar-expand-lg navbar-light bg-light sticky-top">
         <div class="container">
             <a class="navbar-brand fw-bold" href="{{ url_for('index') }}">
-                <i class="fas fa-star text-warning"></i> Misión Victoriosa
+                 <img src="{{ url_for('static', filename='img/logo.jpeg') }}" alt="Logo" height="40" class="me-2">
+                 Misión Victoriosa
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
+
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
+                <!-- Menú principal -->
+                <ul class="navbar-nav me-auto">
                     <li class="nav-item">
                         <a class="nav-link" href="#sobre-nosotros">Sobre Nosotros</a>
                     </li>
@@ -54,6 +34,34 @@
                         <a class="nav-link" href="#contacto">Contáctenos</a>
                     </li>
                 </ul>
+
+                <!-- Botón login/logout alineado a la derecha -->
+                <div class="d-flex align-items-center">
+                    {% if session.user_id %}
+                        <div class="dropdown">
+                            <button class="btn btn-primary dropdown-toggle" type="button" id="userMenu" data-bs-toggle="dropdown">
+                                <i class="fas fa-user"></i> {{ session.username }}
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li>
+                                    <a class="dropdown-item" href="{{ url_for('admin') }}">
+                                        <i class="fas fa-cog"></i> Panel Admin
+                                    </a>
+                                </li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <a class="dropdown-item" href="{{ url_for('logout') }}">
+                                        <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    {% else %}
+                        <a href="{{ url_for('login') }}" class="btn btn-primary">
+                            <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
+                        </a>
+                    {% endif %}
+                </div>
             </div>
         </div>
     </nav>
@@ -71,6 +79,7 @@
             </div>
         {% endif %}
     {% endwith %}
+
 
     <!-- Main Content -->
     <main>

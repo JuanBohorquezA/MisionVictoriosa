@@ -98,6 +98,25 @@ body {
     transform: scale(1.05);
 }
 
+.clickable-card {
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.clickable-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.15);
+}
+
+.card-actions {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.clickable-card:hover .card-actions {
+    opacity: 1;
+}
+
 /* Buttons */
 .btn-primary {
     background-color: var(--primary-blue);
