@@ -1,30 +1,24 @@
-import sqlite3
+from app import app, db
+from models import Usuario
 from werkzeug.security import generate_password_hash
 
 def seed_admin_user():
     """Create initial admin user"""
-    conn = sqlite3.connect('mision_victoriosa.db')
-    cursor = conn.cursor()
-    
-    # Check if admin user already exists
-    cursor.execute('SELECT id FROM usuarios WHERE username = ?', ('admin',))
-    existing_admin = cursor.fetchone()
-    
-    if not existing_admin:
-        # Create admin user
-        password_hash = generate_password_hash('admin123')
-        cursor.execute(
-            'INSERT INTO usuarios (username, password_hash) VALUES (?, ?)',
-            ('admin', password_hash)
-        )
-        conn.commit()
-        print("Admin user created successfully!")
-        print("Username: admin")
-        print("Password: admin123")
-    else:
-        print("Admin user already exists.")
-    
-    conn.close()
+    with app.app_context():
+        # Check if admin user already exists
+        existing_admin = Usuario.query.filter_by(username='admin').first()
+        
+        if not existing_admin:
+            # Create admin user
+            password_hash = generate_password_hash('admin123')
+            admin_user = Usuario(username='admin', password_hash=password_hash)
+            db.session.add(admin_user)
+            db.session.commit()
+            print("Admin user created successfully!")
+            print("Username: admin")
+            print("Password: admin123")
+        else:
+            print("Admin user already exists.")
 
 if __name__ == '__main__':
     seed_admin_user()
