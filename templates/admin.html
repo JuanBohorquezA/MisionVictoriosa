@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+
+{% block title %}Panel de Administración - Misión Victoriosa{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="mb-4">
+                <i class="fas fa-cog"></i> Panel de Administración
+            </h1>
+            
+            <!-- Quick Actions -->
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="card bg-primary text-white">
+                        <div class="card-body text-center">
+                            <i class="fas fa-plus-circle fa-3x mb-3"></i>
+                            <h5>Nuevo Proyecto</h5>
+                            <a href="{{ url_for('new_project') }}" class="btn btn-light">
+                                <i class="fas fa-plus"></i> Crear Proyecto
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card bg-success text-white">
+                        <div class="card-body text-center">
+                            <i class="fas fa-user-plus fa-3x mb-3"></i>
+                            <h5>Nuevo Usuario</h5>
+                            <a href="{{ url_for('new_user') }}" class="btn btn-light">
+                                <i class="fas fa-user-plus"></i> Crear Usuario
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Projects Management -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-project-diagram"></i> Gestión de Proyectos
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if projects %}
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Título</th>
+                                        <th>Descripción</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for project in projects %}
+                                        <tr>
+                                            <td>{{ project.id }}</td>
+                                            <td>{{ project.titulo }}</td>
+                                            <td>{{ project.descripcion[:100] }}{% if project.descripcion|length > 100 %}...{% endif %}</td>
+                                            <td>
+                                                <div class="btn-group btn-group-sm">
+                                                    <a href="{{ url_for('edit_project', project_id=project.id) }}" 
+                                                       class="btn btn-outline-primary">
+                                                        <i class="fas fa-edit"></i> Editar
+                                                    </a>
+                                                    <form method="POST" action="{{ url_for('delete_project', project_id=project.id) }}" 
+                                                          style="display: inline;" 
+                                                          onsubmit="return confirm('¿Está seguro de eliminar este proyecto?')">
+                                                        <button type="submit" class="btn btn-outline-danger">
+                                                            <i class="fas fa-trash"></i> Eliminar
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-folder-open fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">No hay proyectos</h5>
+                            <p class="text-muted">Comience creando su primer proyecto.</p>
+                            <a href="{{ url_for('new_project') }}" class="btn btn-primary">
+                                <i class="fas fa-plus"></i> Crear Primer Proyecto
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Users Management -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-users"></i> Gestión de Usuarios
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if users %}
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Usuario</th>
+                                        <th>Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for user in users %}
+                                        <tr>
+                                            <td>{{ user.id }}</td>
+                                            <td>
+                                                {{ user.username }}
+                                                {% if user.username == 'admin' %}
+                                                    <span class="badge bg-warning">Administrador</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-success">Activo</span>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">No hay usuarios adicionales</h5>
+                            <p class="text-muted">Solo existe el usuario administrador inicial.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

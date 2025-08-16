@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% block title %}{{ action }} Proyecto - Misión Victoriosa{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-project-diagram"></i> {{ action }} Proyecto
+                    </h4>
+                </div>
+                <div class="card-body p-4">
+                    <form method="POST" enctype="multipart/form-data">
+                        <div class="mb-3">
+                            <label for="titulo" class="form-label">Título del Proyecto *</label>
+                            <input type="text" 
+                                   class="form-control" 
+                                   id="titulo" 
+                                   name="titulo" 
+                                   value="{% if project %}{{ project.titulo }}{% endif %}"
+                                   required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="descripcion" class="form-label">Descripción *</label>
+                            <textarea class="form-control" 
+                                      id="descripcion" 
+                                      name="descripcion" 
+                                      rows="5" 
+                                      required>{% if project %}{{ project.descripcion }}{% endif %}</textarea>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="imagen" class="form-label">
+                                Imagen del Proyecto 
+                                {% if project %}(dejar vacío para mantener la actual){% endif %}
+                            </label>
+                            <input type="file" 
+                                   class="form-control" 
+                                   id="imagen" 
+                                   name="imagen" 
+                                   accept="image/*">
+                            <div class="form-text">
+                                Formatos soportados: JPG, PNG, GIF. Tamaño máximo recomendado: 5MB
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between">
+                            <a href="{{ url_for('admin') }}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> {{ action }} Proyecto
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Preview uploaded image
+document.getElementById('imagen').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            // Remove existing preview if any
+            const existingPreview = document.getElementById('imagePreview');
+            if (existingPreview) {
+                existingPreview.remove();
+            }
+            
+            // Create new preview
+            const preview = document.createElement('div');
+            preview.id = 'imagePreview';
+            preview.className = 'mt-3 text-center';
+            preview.innerHTML = `
+                <p class="small text-muted">Vista previa:</p>
+                <img src="${e.target.result}" class="img-thumbnail" style="max-height: 200px;">
+            `;
+            
+            // Insert after the file input
+            document.getElementById('imagen').parentNode.appendChild(preview);
+        };
+        reader.readAsDataURL(file);
+    }
+});
+</script>
+{% endblock %}

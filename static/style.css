@@ -1,0 +1,333 @@
+/* Misión Victoriosa - Custom Styles */
+
+:root {
+    /* Light color palette as requested */
+    --primary-yellow: #FFEB3B;
+    --light-yellow: #FFF9C4;
+    --primary-blue: #64B5F6;
+    --light-blue: #BBDEFB;
+    --white: #FFFFFF;
+    --light-gray: #F5F5F5;
+    --medium-gray: #9E9E9E;
+    --dark-gray: #424242;
+}
+
+/* Global Styles */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--white);
+    color: var(--dark-gray);
+    line-height: 1.6;
+}
+
+/* Login Button Container - Always visible on left */
+.login-button-container {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 1050;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    border-radius: 8px;
+}
+
+.login-button-container .btn {
+    border-radius: 8px;
+    padding: 10px 15px;
+    font-weight: 500;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+/* Navbar Customization */
+.navbar-brand {
+    color: var(--primary-blue) !important;
+    font-size: 1.5rem;
+}
+
+.navbar-nav .nav-link {
+    color: var(--dark-gray) !important;
+    font-weight: 500;
+    margin: 0 10px;
+    transition: color 0.3s ease;
+}
+
+.navbar-nav .nav-link:hover {
+    color: var(--primary-blue) !important;
+}
+
+/* Hero Section */
+.hero-section {
+    background: linear-gradient(135deg, var(--light-blue) 0%, var(--light-yellow) 100%);
+    color: var(--dark-gray);
+    margin-top: 0;
+}
+
+.hero-section h1 {
+    color: var(--primary-blue);
+    margin-bottom: 20px;
+}
+
+/* Cards */
+.card {
+    border: none;
+    border-radius: 12px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+}
+
+.card-header {
+    border-radius: 12px 12px 0 0 !important;
+    border: none;
+}
+
+/* Project Cards */
+.project-card {
+    overflow: hidden;
+}
+
+.project-image {
+    height: 200px;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.project-card:hover .project-image {
+    transform: scale(1.05);
+}
+
+/* Buttons */
+.btn-primary {
+    background-color: var(--primary-blue);
+    border-color: var(--primary-blue);
+    border-radius: 8px;
+    font-weight: 500;
+    padding: 10px 20px;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    background-color: #42A5F5;
+    border-color: #42A5F5;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(100, 181, 246, 0.3);
+}
+
+.btn-success {
+    background-color: #4CAF50;
+    border-color: #4CAF50;
+    border-radius: 8px;
+}
+
+.btn-warning {
+    background-color: var(--primary-yellow);
+    border-color: var(--primary-yellow);
+    color: var(--dark-gray);
+    border-radius: 8px;
+}
+
+/* Forms */
+.form-control {
+    border-radius: 8px;
+    border: 2px solid #E0E0E0;
+    padding: 12px 15px;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.form-control:focus {
+    border-color: var(--primary-blue);
+    box-shadow: 0 0 0 0.2rem rgba(100, 181, 246, 0.25);
+}
+
+.input-group-text {
+    background-color: var(--light-gray);
+    border: 2px solid #E0E0E0;
+    border-radius: 8px 0 0 8px;
+    color: var(--medium-gray);
+}
+
+/* Sections */
+section {
+    scroll-margin-top: 80px;
+}
+
+#sobre-nosotros {
+    background-color: var(--white);
+}
+
+#proyectos {
+    background-color: var(--light-gray);
+}
+
+#contacto {
+    background-color: var(--white);
+}
+
+/* Text Colors */
+.text-primary {
+    color: var(--primary-blue) !important;
+}
+
+.text-warning {
+    color: var(--primary-yellow) !important;
+}
+
+/* Admin Panel Styles */
+.table {
+    background-color: var(--white);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+.table thead th {
+    background-color: var(--light-gray);
+    border: none;
+    color: var(--dark-gray);
+    font-weight: 600;
+    padding: 15px;
+}
+
+.table tbody td {
+    border: none;
+    padding: 15px;
+    vertical-align: middle;
+}
+
+.table tbody tr {
+    border-bottom: 1px solid #F0F0F0;
+}
+
+.table tbody tr:hover {
+    background-color: var(--light-gray);
+}
+
+/* Badges */
+.badge {
+    font-size: 0.75em;
+    padding: 6px 10px;
+    border-radius: 20px;
+}
+
+/* Footer */
+footer {
+    background-color: var(--light-gray) !important;
+    border-top: 1px solid #E0E0E0;
+    margin-top: 50px;
+}
+
+/* Alerts */
+.alert {
+    border: none;
+    border-radius: 10px;
+    padding: 15px 20px;
+}
+
+.alert-success {
+    background-color: #E8F5E8;
+    color: #2E7D2E;
+}
+
+.alert-danger {
+    background-color: #FFEBEE;
+    color: #C62828;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .login-button-container {
+        top: 10px;
+        left: 10px;
+    }
+    
+    .login-button-container .btn {
+        padding: 8px 12px;
+        font-size: 0.9rem;
+    }
+    
+    .hero-section h1 {
+        font-size: 2rem;
+    }
+    
+    .hero-section p {
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .container {
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+    
+    .card-body {
+        padding: 20px;
+    }
+    
+    .btn-group .btn {
+        font-size: 0.8rem;
+        padding: 5px 10px;
+    }
+}
+
+/* Loading states */
+.btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Image upload preview */
+#imagePreview img {
+    border-radius: 8px;
+    max-width: 100%;
+    height: auto;
+}
+
+/* Smooth scrolling */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Focus styles for accessibility */
+.btn:focus,
+.form-control:focus,
+.nav-link:focus {
+    outline: 2px solid var(--primary-blue);
+    outline-offset: 2px;
+}
+
+/* Animation for cards */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.card {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--light-gray);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--medium-gray);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--dark-gray);
+}

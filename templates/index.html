@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section text-center py-5">
+    <div class="container">
+        <h1 class="display-4 fw-bold text-primary">Bienvenidos a Misión Victoriosa</h1>
+        <p class="lead text-muted">Transformando vidas y comunidades a través de nuestros proyectos</p>
+    </div>
+</section>
+
+<!-- Sobre Nosotros Section -->
+<section id="sobre-nosotros" class="py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <h2 class="text-center mb-4 text-primary">
+                    <i class="fas fa-users"></i> Sobre Nosotros
+                </h2>
+                <div class="card shadow-sm">
+                    <div class="card-body p-4">
+                        <p class="lead">
+                            Misión Victoriosa es una organización dedicada a generar un impacto positivo 
+                            en nuestras comunidades a través de proyectos innovadores y sostenibles.
+                        </p>
+                        <p>
+                            Nuestro equipo está comprometido con la excelencia, la transparencia y el 
+                            trabajo colaborativo para alcanzar objetivos que beneficien a la sociedad 
+                            en su conjunto.
+                        </p>
+                        <div class="row text-center mt-4">
+                            <div class="col-md-4">
+                                <i class="fas fa-lightbulb fa-3x text-warning mb-3"></i>
+                                <h5>Innovación</h5>
+                                <p class="small text-muted">Soluciones creativas para desafíos reales</p>
+                            </div>
+                            <div class="col-md-4">
+                                <i class="fas fa-handshake fa-3x text-primary mb-3"></i>
+                                <h5>Colaboración</h5>
+                                <p class="small text-muted">Trabajamos unidos por un objetivo común</p>
+                            </div>
+                            <div class="col-md-4">
+                                <i class="fas fa-leaf fa-3x text-success mb-3"></i>
+                                <h5>Sostenibilidad</h5>
+                                <p class="small text-muted">Proyectos que perduran en el tiempo</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Proyectos Section -->
+<section id="proyectos" class="py-5 bg-light">
+    <div class="container">
+        <h2 class="text-center mb-5 text-primary">
+            <i class="fas fa-project-diagram"></i> Nuestros Proyectos
+        </h2>
+        
+        {% if projects %}
+            <div class="row">
+                {% for project in projects %}
+                    <div class="col-lg-4 col-md-6 mb-4">
+                        <div class="card h-100 shadow-sm project-card">
+                            {% if project.imagen_base64 %}
+                                <img src="{{ project.imagen_base64 }}" 
+                                     class="card-img-top project-image" 
+                                     alt="{{ project.titulo }}">
+                            {% else %}
+                                <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                                    <i class="fas fa-image fa-3x text-muted"></i>
+                                </div>
+                            {% endif %}
+                            <div class="card-body">
+                                <h5 class="card-title text-primary">{{ project.titulo }}</h5>
+                                <p class="card-text">{{ project.descripcion }}</p>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-folder-open fa-5x text-muted mb-3"></i>
+                <h4 class="text-muted">No hay proyectos disponibles</h4>
+                <p class="text-muted">Los proyectos aparecerán aquí una vez que sean creados.</p>
+            </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Contacto Section -->
+<section id="contacto" class="py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <h2 class="text-center mb-4 text-primary">
+                    <i class="fas fa-envelope"></i> Contáctenos
+                </h2>
+                <div class="card shadow-sm">
+                    <div class="card-body p-4">
+                        <form method="POST" action="{{ url_for('contact') }}">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="nombre" class="form-label">Nombre *</label>
+                                    <input type="text" class="form-control" id="nombre" name="nombre" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="email" class="form-label">Email *</label>
+                                    <input type="email" class="form-control" id="email" name="email" required>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="mensaje" class="form-label">Mensaje *</label>
+                                <textarea class="form-control" id="mensaje" name="mensaje" rows="5" required></textarea>
+                            </div>
+                            <div class="text-center">
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    <i class="fas fa-paper-plane"></i> Enviar Mensaje
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                
+                <div class="row mt-4">
+                    <div class="col-md-4 text-center">
+                        <i class="fas fa-map-marker-alt fa-2x text-primary mb-2"></i>
+                        <h6>Ubicación</h6>
+                        <p class="small text-muted">Ciudad, País</p>
+                    </div>
+                    <div class="col-md-4 text-center">
+                        <i class="fas fa-phone fa-2x text-primary mb-2"></i>
+                        <h6>Teléfono</h6>
+                        <p class="small text-muted">+1 (555) 123-4567</p>
+                    </div>
+                    <div class="col-md-4 text-center">
+                        <i class="fas fa-clock fa-2x text-primary mb-2"></i>
+                        <h6>Horario</h6>
+                        <p class="small text-muted">Lun - Vie: 9:00 - 18:00</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
