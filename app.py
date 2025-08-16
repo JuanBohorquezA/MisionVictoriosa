@@ -43,7 +43,22 @@ def init_db():
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             titulo TEXT NOT NULL,
             descripcion TEXT NOT NULL,
-            imagen BLOB
+            imagen BLOB,
+            fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
+    
+    # Create recursos table for multiple images per project
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS recursos (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            proyecto_id INTEGER NOT NULL,
+            tipo TEXT NOT NULL DEFAULT 'imagen',
+            nombre TEXT NOT NULL,
+            contenido BLOB NOT NULL,
+            orden INTEGER DEFAULT 0,
+            fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (proyecto_id) REFERENCES proyectos (id) ON DELETE CASCADE
         )
     ''')
     
@@ -83,15 +98,49 @@ def index():
     cursor.execute('SELECT id, titulo, descripcion, imagen FROM proyectos ORDER BY id DESC')
     projects = cursor.fetchall()
     
-    # Convert BLOB images to base64 for display
+    # Convert BLOB images to base64 for display and get additional resources
     projects_with_images = []
     for project in projects:
         project_dict = dict(project)
+        
+        # Get main image (legacy)
         if project['imagen']:
             image_data = base64.b64encode(project['imagen']).decode('utf-8')
             project_dict['imagen_base64'] = f"data:image/jpeg;base64,{image_data}"
         else:
             project_dict['imagen_base64'] = None
+        
+        # Get additional resources (images)
+        cursor.execute('''
+            SELECT id, nombre, contenido, orden 
+            FROM recursos 
+            WHERE proyecto_id = ? AND tipo = 'imagen' 
+            ORDER BY orden, id
+        ''', (project['id'],))
+        recursos = cursor.fetchall()
+        
+        project_dict['recursos'] = []
+        for recurso in recursos:
+            if recurso['contenido']:
+                resource_data = base64.b64encode(recurso['contenido']).decode('utf-8')
+                project_dict['recursos'].append({
+                    'id': recurso['id'],
+                    'nombre': recurso['nombre'],
+                    'imagen_base64': f"data:image/jpeg;base64,{resource_data}",
+                    'orden': recurso['orden']
+                })
+        
+        # Create combined images list (main image + resources)
+        project_dict['todas_imagenes'] = []
+        if project_dict['imagen_base64']:
+            project_dict['todas_imagenes'].append({
+                'id': 'main',
+                'nombre': 'Imagen principal',
+                'imagen_base64': project_dict['imagen_base64'],
+                'orden': -1
+            })
+        project_dict['todas_imagenes'].extend(project_dict['recursos'])
+        
         projects_with_images.append(project_dict)
     
     conn.close()
@@ -157,16 +206,33 @@ def new_project():
         descripcion = request.form['descripcion']
         imagen_file = request.files.get('imagen')
         
+        conn = get_db()
+        cursor = conn.cursor()
+        
+        # Create project
         imagen_blob = None
         if imagen_file and imagen_file.filename:
             imagen_blob = imagen_file.read()
         
-        conn = get_db()
-        cursor = conn.cursor()
         cursor.execute(
             'INSERT INTO proyectos (titulo, descripcion, imagen) VALUES (?, ?, ?)',
             (titulo, descripcion, imagen_blob)
         )
+        project_id = cursor.lastrowid
+        
+        # Handle multiple additional images
+        imagenes_adicionales = request.files.getlist('imagenes_adicionales')
+        orden = 1
+        for imagen_adicional in imagenes_adicionales:
+            if imagen_adicional and imagen_adicional.filename:
+                imagen_content = imagen_adicional.read()
+                if imagen_content:  # Only save if there's actual content
+                    cursor.execute(
+                        'INSERT INTO recursos (proyecto_id, tipo, nombre, contenido, orden) VALUES (?, ?, ?, ?, ?)',
+                        (project_id, 'imagen', imagen_adicional.filename, imagen_content, orden)
+                    )
+                    orden += 1
+        
         conn.commit()
         conn.close()
         
@@ -202,6 +268,25 @@ def edit_project(project_id):
                 'UPDATE proyectos SET titulo = ?, descripcion = ?, imagen = ? WHERE id = ?',
                 (titulo, descripcion, imagen_blob, project_id)
             )
+            
+            # Handle new additional images
+            imagenes_adicionales = request.files.getlist('imagenes_adicionales')
+            if imagenes_adicionales:
+                # Get current max order
+                cursor.execute('SELECT COALESCE(MAX(orden), 0) FROM recursos WHERE proyecto_id = ?', (project_id,))
+                max_orden = cursor.fetchone()[0]
+                orden = max_orden + 1
+                
+                for imagen_adicional in imagenes_adicionales:
+                    if imagen_adicional and imagen_adicional.filename:
+                        imagen_content = imagen_adicional.read()
+                        if imagen_content:  # Only save if there's actual content
+                            cursor.execute(
+                                'INSERT INTO recursos (proyecto_id, tipo, nombre, contenido, orden) VALUES (?, ?, ?, ?, ?)',
+                                (project_id, 'imagen', imagen_adicional.filename, imagen_content, orden)
+                            )
+                            orden += 1
+            
             conn.commit()
             flash('Proyecto actualizado exitosamente.', 'success')
         else:
@@ -213,6 +298,30 @@ def edit_project(project_id):
     # GET request - show form with current data
     cursor.execute('SELECT id, titulo, descripcion FROM proyectos WHERE id = ?', (project_id,))
     project = cursor.fetchone()
+    
+    # Get existing resources
+    if project:
+        cursor.execute('''
+            SELECT id, nombre, contenido, orden 
+            FROM recursos 
+            WHERE proyecto_id = ? AND tipo = 'imagen' 
+            ORDER BY orden, id
+        ''', (project_id,))
+        recursos = cursor.fetchall()
+        
+        project_dict = dict(project)
+        project_dict['recursos'] = []
+        for recurso in recursos:
+            if recurso['contenido']:
+                resource_data = base64.b64encode(recurso['contenido']).decode('utf-8')
+                project_dict['recursos'].append({
+                    'id': recurso['id'],
+                    'nombre': recurso['nombre'],
+                    'imagen_base64': f"data:image/jpeg;base64,{resource_data}",
+                    'orden': recurso['orden']
+                })
+        project = project_dict
+    
     conn.close()
     
     if not project:
@@ -267,6 +376,80 @@ def new_user():
     
     return render_template('user_form.html', action='Crear')
 
+@app.route('/admin/user/<int:user_id>/edit', methods=['GET', 'POST'])
+@admin_required
+def edit_user(user_id):
+    """Edit existing user (admin only)"""
+    conn = get_db()
+    cursor = conn.cursor()
+    
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form.get('password')
+        
+        # Check if username already exists for other users
+        cursor.execute('SELECT id FROM usuarios WHERE username = ? AND id != ?', (username, user_id))
+        existing_user = cursor.fetchone()
+        
+        if existing_user:
+            flash('El nombre de usuario ya existe.', 'error')
+            cursor.execute('SELECT id, username FROM usuarios WHERE id = ?', (user_id,))
+            user = cursor.fetchone()
+            conn.close()
+            return render_template('user_form.html', user=user, action='Editar')
+        
+        # Update user
+        if password:
+            password_hash = generate_password_hash(password)
+            cursor.execute(
+                'UPDATE usuarios SET username = ?, password_hash = ? WHERE id = ?',
+                (username, password_hash, user_id)
+            )
+        else:
+            cursor.execute(
+                'UPDATE usuarios SET username = ? WHERE id = ?',
+                (username, user_id)
+            )
+        
+        conn.commit()
+        conn.close()
+        
+        flash('Usuario actualizado exitosamente.', 'success')
+        return redirect(url_for('admin'))
+    
+    # GET request - show form with current data
+    cursor.execute('SELECT id, username FROM usuarios WHERE id = ?', (user_id,))
+    user = cursor.fetchone()
+    conn.close()
+    
+    if not user:
+        flash('Usuario no encontrado.', 'error')
+        return redirect(url_for('admin'))
+    
+    return render_template('user_form.html', user=user, action='Editar')
+
+@app.route('/admin/user/<int:user_id>/delete', methods=['POST'])
+@admin_required
+def delete_user(user_id):
+    """Delete user (admin only)"""
+    # Prevent deletion of admin user
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute('SELECT username FROM usuarios WHERE id = ?', (user_id,))
+    user = cursor.fetchone()
+    
+    if not user:
+        flash('Usuario no encontrado.', 'error')
+    elif user['username'] == 'admin':
+        flash('No se puede eliminar al usuario administrador.', 'error')
+    else:
+        cursor.execute('DELETE FROM usuarios WHERE id = ?', (user_id,))
+        conn.commit()
+        flash('Usuario eliminado exitosamente.', 'success')
+    
+    conn.close()
+    return redirect(url_for('admin'))
+
 @app.route('/contact', methods=['POST'])
 def contact():
     """Handle contact form submission"""
@@ -303,7 +486,6 @@ def project_detail(project_id):
     cursor = conn.cursor()
     cursor.execute('SELECT id, titulo, descripcion, imagen FROM proyectos WHERE id = ?', (project_id,))
     project = cursor.fetchone()
-    conn.close()
     
     if not project:
         flash('Proyecto no encontrado.', 'error')
@@ -317,8 +499,68 @@ def project_detail(project_id):
     else:
         project_dict['imagen_base64'] = None
     
+    # Get additional resources (images)
+    cursor.execute('''
+        SELECT id, nombre, contenido, orden 
+        FROM recursos 
+        WHERE proyecto_id = ? AND tipo = 'imagen' 
+        ORDER BY orden, id
+    ''', (project_id,))
+    recursos = cursor.fetchall()
+    
+    project_dict['recursos'] = []
+    for recurso in recursos:
+        if recurso['contenido']:
+            resource_data = base64.b64encode(recurso['contenido']).decode('utf-8')
+            project_dict['recursos'].append({
+                'id': recurso['id'],
+                'nombre': recurso['nombre'],
+                'imagen_base64': f"data:image/jpeg;base64,{resource_data}",
+                'orden': recurso['orden']
+            })
+    
+    # Create combined images list (main image + resources)
+    project_dict['todas_imagenes'] = []
+    if project_dict['imagen_base64']:
+        project_dict['todas_imagenes'].append({
+            'id': 'main',
+            'nombre': 'Imagen principal',
+            'imagen_base64': project_dict['imagen_base64'],
+            'orden': -1
+        })
+    project_dict['todas_imagenes'].extend(project_dict['recursos'])
+    
+    conn.close()
+    
     is_authenticated = 'user_id' in session
     return render_template('project_detail.html', project=project_dict, is_authenticated=is_authenticated)
+
+@app.route('/admin/recurso/<int:recurso_id>/delete', methods=['POST'])
+@login_required
+def delete_recurso(recurso_id):
+    """Delete a project resource"""
+    conn = get_db()
+    cursor = conn.cursor()
+    
+    # Get project_id for redirect
+    cursor.execute('SELECT proyecto_id FROM recursos WHERE id = ?', (recurso_id,))
+    recurso = cursor.fetchone()
+    
+    if recurso:
+        cursor.execute('DELETE FROM recursos WHERE id = ?', (recurso_id,))
+        conn.commit()
+        flash('Recurso eliminado exitosamente.', 'success')
+        project_id = recurso['proyecto_id']
+    else:
+        flash('Recurso no encontrado.', 'error')
+        project_id = None
+    
+    conn.close()
+    
+    if project_id:
+        return redirect(url_for('edit_project', project_id=project_id))
+    else:
+        return redirect(url_for('admin'))
 
 if __name__ == '__main__':
     init_db()

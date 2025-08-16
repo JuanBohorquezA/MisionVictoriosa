@@ -350,3 +350,72 @@ html {
 ::-webkit-scrollbar-thumb:hover {
     background: var(--dark-gray);
 }
+
+/* Project carousel styling */
+.project-carousel {
+    position: relative;
+}
+
+.project-carousel .carousel-inner {
+    border-radius: 8px 8px 0 0;
+}
+
+.project-carousel .carousel-control-prev,
+.project-carousel .carousel-control-next {
+    width: 30px;
+    height: 30px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 50%;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.project-carousel .carousel-control-prev {
+    left: 10px;
+}
+
+.project-carousel .carousel-control-next {
+    right: 10px;
+}
+
+.project-card:hover .carousel-control-prev,
+.project-card:hover .carousel-control-next {
+    opacity: 1;
+}
+
+.project-carousel .carousel-control-prev-icon,
+.project-carousel .carousel-control-next-icon {
+    width: 16px;
+    height: 16px;
+}
+
+.project-carousel .carousel-indicators {
+    bottom: 10px;
+    margin-bottom: 0;
+}
+
+.project-carousel .carousel-indicators button {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin: 0 2px;
+    opacity: 0.5;
+}
+
+.project-carousel .carousel-indicators button.active {
+    opacity: 1;
+}
+
+.image-counter {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 10;
+}
+
+.image-counter .badge {
+    font-size: 0.7rem;
+    opacity: 0.9;
+}

@@ -64,11 +64,42 @@
                 {% for project in projects %}
                     <div class="col-lg-4 col-md-6 mb-4">
                         <div class="card h-100 shadow-sm project-card clickable-card" onclick="window.location.href='{{ url_for('project_detail', project_id=project.id) }}'">
-                            {% if project.imagen_base64 %}
+                            {% if project.todas_imagenes|length > 1 %}
+                                <!-- Slider para múltiples imágenes -->
+                                <div id="carousel{{ project.id }}" class="carousel slide project-carousel" data-bs-ride="carousel">
+                                    <div class="carousel-inner">
+                                        {% for imagen in project.todas_imagenes %}
+                                            <div class="carousel-item {% if loop.first %}active{% endif %}">
+                                                <img src="{{ imagen.imagen_base64 }}" 
+                                                     class="d-block w-100 project-image" 
+                                                     alt="{{ imagen.nombre }}">
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                    {% if project.todas_imagenes|length > 1 %}
+                                        <button class="carousel-control-prev" type="button" data-bs-target="#carousel{{ project.id }}" data-bs-slide="prev" onclick="event.stopPropagation();">
+                                            <span class="carousel-control-prev-icon"></span>
+                                        </button>
+                                        <button class="carousel-control-next" type="button" data-bs-target="#carousel{{ project.id }}" data-bs-slide="next" onclick="event.stopPropagation();">
+                                            <span class="carousel-control-next-icon"></span>
+                                        </button>
+                                        <div class="carousel-indicators">
+                                            {% for imagen in project.todas_imagenes %}
+                                                <button type="button" data-bs-target="#carousel{{ project.id }}" data-bs-slide-to="{{ loop.index0 }}" {% if loop.first %}class="active"{% endif %} onclick="event.stopPropagation();"></button>
+                                            {% endfor %}
+                                        </div>
+                                        <div class="image-counter">
+                                            <span class="badge bg-dark">{{ project.todas_imagenes|length }} <i class="fas fa-images"></i></span>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            {% elif project.imagen_base64 %}
+                                <!-- Imagen única -->
                                 <img src="{{ project.imagen_base64 }}" 
                                      class="card-img-top project-image" 
                                      alt="{{ project.titulo }}">
                             {% else %}
+                                <!-- Sin imagen -->
                                 <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
                                     <i class="fas fa-image fa-3x text-muted"></i>
                                 </div>
@@ -79,6 +110,9 @@
                                 <div class="card-actions mt-auto">
                                     <span class="btn btn-outline-primary btn-sm">
                                         <i class="fas fa-eye"></i> Ver Detalles
+                                        {% if project.todas_imagenes|length > 1 %}
+                                            <span class="badge bg-primary ms-1">{{ project.todas_imagenes|length }} fotos</span>
+                                        {% endif %}
                                     </span>
                                 </div>
                             </div>

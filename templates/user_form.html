@@ -24,6 +24,7 @@
                                        class="form-control" 
                                        id="username" 
                                        name="username" 
+                                       value="{% if user %}{{ user.username }}{% endif %}"
                                        required>
                             </div>
                             <div class="form-text">
@@ -32,7 +33,9 @@
                         </div>
                         
                         <div class="mb-3">
-                            <label for="password" class="form-label">Contraseña *</label>
+                            <label for="password" class="form-label">
+                                Contraseña {% if not user %}*{% else %}<span class="text-muted">(opcional - dejar vacío para mantener actual)</span>{% endif %}
+                            </label>
                             <div class="input-group">
                                 <span class="input-group-text">
                                     <i class="fas fa-lock"></i>
@@ -41,16 +44,22 @@
                                        class="form-control" 
                                        id="password" 
                                        name="password" 
-                                       required
+                                       {% if not user %}required{% endif %}
                                        minlength="6">
                             </div>
                             <div class="form-text">
-                                La contraseña debe tener al menos 6 caracteres.
+                                {% if not user %}
+                                    La contraseña debe tener al menos 6 caracteres.
+                                {% else %}
+                                    Dejar vacío para mantener la contraseña actual. Si se ingresa, debe tener al menos 6 caracteres.
+                                {% endif %}
                             </div>
                         </div>
                         
                         <div class="mb-3">
-                            <label for="confirm_password" class="form-label">Confirmar Contraseña *</label>
+                            <label for="confirm_password" class="form-label">
+                                Confirmar Contraseña {% if not user %}*{% endif %}
+                            </label>
                             <div class="input-group">
                                 <span class="input-group-text">
                                     <i class="fas fa-lock"></i>
@@ -59,7 +68,7 @@
                                        class="form-control" 
                                        id="confirm_password" 
                                        name="confirm_password" 
-                                       required
+                                       {% if not user %}required{% endif %}
                                        minlength="6">
                             </div>
                         </div>
@@ -85,8 +94,13 @@ document.getElementById('confirm_password').addEventListener('input', function()
     const password = document.getElementById('password').value;
     const confirmPassword = this.value;
     
-    if (password !== confirmPassword) {
-        this.setCustomValidity('Las contraseñas no coinciden');
+    // Only validate if either field has content
+    if (password || confirmPassword) {
+        if (password !== confirmPassword) {
+            this.setCustomValidity('Las contraseñas no coinciden');
+        } else {
+            this.setCustomValidity('');
+        }
     } else {
         this.setCustomValidity('');
     }
@@ -95,7 +109,7 @@ document.getElementById('confirm_password').addEventListener('input', function()
 // Also check when password field changes
 document.getElementById('password').addEventListener('input', function() {
     const confirmPassword = document.getElementById('confirm_password');
-    if (confirmPassword.value) {
+    if (confirmPassword.value || this.value) {
         confirmPassword.dispatchEvent(new Event('input'));
     }
 });

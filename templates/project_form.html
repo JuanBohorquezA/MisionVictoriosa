@@ -69,10 +69,10 @@
                                     </div>
                                 </div>
                                 
-                                <!-- Imagen -->
+                                <!-- Imagen Principal -->
                                 <div class="form-group mb-4">
                                     <label for="imagen" class="form-label fw-bold">
-                                        <i class="fas fa-camera text-primary me-2"></i>Imagen del Proyecto
+                                        <i class="fas fa-camera text-primary me-2"></i>Imagen Principal del Proyecto
                                         {% if project %}<span class="text-muted">(opcional - mantener actual si no se selecciona)</span>{% endif %}
                                     </label>
                                     <div class="upload-area" id="uploadArea">
@@ -92,9 +92,68 @@
                                         </div>
                                     </div>
                                     <div class="form-text">
-                                        <i class="fas fa-info-circle"></i> Formatos: JPG, PNG, GIF. Tamaño máximo: 5MB
+                                        <i class="fas fa-info-circle"></i> Imagen principal que se mostrará como portada
                                     </div>
                                 </div>
+                                
+                                <!-- Imágenes Adicionales -->
+                                <div class="form-group mb-4">
+                                    <label for="imagenes_adicionales" class="form-label fw-bold">
+                                        <i class="fas fa-images text-primary me-2"></i>Imágenes Adicionales
+                                        <span class="badge bg-info ms-2">Nuevo</span>
+                                    </label>
+                                    <div class="upload-area-multiple" id="uploadAreaMultiple">
+                                        <input type="file" 
+                                               class="form-control" 
+                                               id="imagenes_adicionales" 
+                                               name="imagenes_adicionales" 
+                                               accept="image/*"
+                                               multiple
+                                               hidden>
+                                        <div class="upload-content text-center p-4">
+                                            <i class="fas fa-images fa-3x text-success mb-3"></i>
+                                            <h5>Arrastra múltiples imágenes aquí</h5>
+                                            <p class="text-muted">o</p>
+                                            <button type="button" class="btn btn-outline-success" onclick="document.getElementById('imagenes_adicionales').click()">
+                                                <i class="fas fa-plus"></i> Seleccionar Múltiples Imágenes
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="form-text">
+                                        <i class="fas fa-info-circle"></i> Puedes seleccionar múltiples imágenes. Se mostrarán en un slider
+                                    </div>
+                                    <div id="selectedImagesPreview" class="mt-3"></div>
+                                </div>
+                                
+                                <!-- Recursos Existentes (Solo en edición) -->
+                                {% if project and project.recursos %}
+                                <div class="form-group mb-4">
+                                    <label class="form-label fw-bold">
+                                        <i class="fas fa-folder text-warning me-2"></i>Imágenes Actuales
+                                    </label>
+                                    <div class="existing-resources">
+                                        <div class="row">
+                                            {% for recurso in project.recursos %}
+                                            <div class="col-md-4 mb-3">
+                                                <div class="resource-item">
+                                                    <img src="{{ recurso.imagen_base64 }}" class="img-thumbnail" alt="{{ recurso.nombre }}">
+                                                    <div class="resource-info mt-2">
+                                                        <small class="text-muted d-block">{{ recurso.nombre }}</small>
+                                                        <form method="POST" action="{{ url_for('delete_recurso', recurso_id=recurso.id) }}" 
+                                                              style="display: inline;" 
+                                                              onsubmit="return confirm('¿Eliminar esta imagen?')">
+                                                            <button type="submit" class="btn btn-outline-danger btn-sm mt-1">
+                                                                <i class="fas fa-trash"></i> Eliminar
+                                                            </button>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endif %}
                                 
                                 <!-- Botones de Acción -->
                                 <div class="form-actions d-flex justify-content-between align-items-center mt-5">
@@ -195,6 +254,78 @@
     border-color: var(--primary-blue);
     background: var(--light-blue);
     transform: scale(1.02);
+}
+
+.upload-area-multiple {
+    border: 2px dashed #28a745;
+    border-radius: 12px;
+    background: #f8f9fa;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.upload-area-multiple:hover {
+    border-color: #20c997;
+    background: #e8f5e9;
+}
+
+.upload-area-multiple.dragover {
+    border-color: #20c997;
+    background: #e8f5e9;
+    transform: scale(1.02);
+}
+
+.existing-resources .resource-item {
+    text-align: center;
+}
+
+.existing-resources .resource-item img {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+}
+
+.selected-images-preview {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.selected-image-item {
+    position: relative;
+    width: 120px;
+    height: 120px;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 2px solid #dee2e6;
+}
+
+.selected-image-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.selected-image-item .remove-btn {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    background: rgba(220, 53, 69, 0.9);
+    color: white;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.selected-image-item .remove-btn:hover {
+    background: #dc3545;
 }
 
 .preview-image {
@@ -298,6 +429,123 @@ document.addEventListener('DOMContentLoaded', function() {
             previewUploadedImage(e.target.files[0]);
         }
     });
+
+    // Multiple images functionality
+    const imagenesAdicionalesInput = document.getElementById('imagenes_adicionales');
+    const uploadAreaMultiple = document.getElementById('uploadAreaMultiple');
+    const selectedImagesPreview = document.getElementById('selectedImagesPreview');
+    let selectedFiles = [];
+
+    // Multiple images drag and drop
+    uploadAreaMultiple.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        this.classList.add('dragover');
+    });
+
+    uploadAreaMultiple.addEventListener('dragleave', function(e) {
+        e.preventDefault();
+        this.classList.remove('dragover');
+    });
+
+    uploadAreaMultiple.addEventListener('drop', function(e) {
+        e.preventDefault();
+        this.classList.remove('dragover');
+        
+        const files = Array.from(e.dataTransfer.files);
+        const imageFiles = files.filter(file => file.type.startsWith('image/'));
+        if (imageFiles.length > 0) {
+            addSelectedImages(imageFiles);
+        }
+    });
+
+    // Click to select multiple files
+    uploadAreaMultiple.addEventListener('click', function() {
+        imagenesAdicionalesInput.click();
+    });
+
+    // Multiple file input change
+    imagenesAdicionalesInput.addEventListener('change', function(e) {
+        const files = Array.from(e.target.files);
+        if (files.length > 0) {
+            addSelectedImages(files);
+        }
+    });
+
+    function addSelectedImages(files) {
+        files.forEach(file => {
+            if (!selectedFiles.some(f => f.name === file.name && f.size === file.size)) {
+                selectedFiles.push(file);
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const imageItem = document.createElement('div');
+                    imageItem.className = 'selected-image-item';
+                    imageItem.innerHTML = `
+                        <img src="${e.target.result}" alt="${file.name}">
+                        <button type="button" class="remove-btn" onclick="removeSelectedImage('${file.name}', ${file.size})">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    `;
+                    selectedImagesPreview.appendChild(imageItem);
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+        
+        updateFileInput();
+        updateUploadAreaText();
+    }
+
+    function updateFileInput() {
+        const dt = new DataTransfer();
+        selectedFiles.forEach(file => dt.items.add(file));
+        imagenesAdicionalesInput.files = dt.files;
+    }
+
+    function updateUploadAreaText() {
+        if (selectedFiles.length > 0) {
+            uploadAreaMultiple.innerHTML = `
+                <div class="upload-content text-center p-4">
+                    <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
+                    <h5 class="text-success">${selectedFiles.length} imagen(es) seleccionada(s)</h5>
+                    <button type="button" class="btn btn-outline-success btn-sm">
+                        <i class="fas fa-plus"></i> Agregar más imágenes
+                    </button>
+                </div>
+            `;
+        }
+    }
+
+    // Make removeSelectedImage global
+    window.removeSelectedImage = function(fileName, fileSize) {
+        selectedFiles = selectedFiles.filter(f => !(f.name === fileName && f.size === fileSize));
+        updateFileInput();
+        
+        // Remove visual item
+        const items = selectedImagesPreview.children;
+        for (let i = 0; i < items.length; i++) {
+            const img = items[i].querySelector('img');
+            if (img && img.alt === fileName) {
+                items[i].remove();
+                break;
+            }
+        }
+        
+        if (selectedFiles.length === 0) {
+            uploadAreaMultiple.innerHTML = `
+                <div class="upload-content text-center p-4">
+                    <i class="fas fa-images fa-3x text-success mb-3"></i>
+                    <h5>Arrastra múltiples imágenes aquí</h5>
+                    <p class="text-muted">o</p>
+                    <button type="button" class="btn btn-outline-success">
+                        <i class="fas fa-plus"></i> Seleccionar Múltiples Imágenes
+                    </button>
+                </div>
+            `;
+        } else {
+            updateUploadAreaText();
+        }
+    };
 
     function previewUploadedImage(file) {
         const reader = new FileReader();

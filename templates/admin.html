@@ -126,6 +126,7 @@
                                         <th>ID</th>
                                         <th>Usuario</th>
                                         <th>Estado</th>
+                                        <th>Acciones</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -140,6 +141,23 @@
                                             </td>
                                             <td>
                                                 <span class="badge bg-success">Activo</span>
+                                            </td>
+                                            <td>
+                                                <div class="btn-group btn-group-sm">
+                                                    <a href="{{ url_for('edit_user', user_id=user.id) }}" 
+                                                       class="btn btn-outline-primary">
+                                                        <i class="fas fa-edit"></i> Editar
+                                                    </a>
+                                                    {% if user.username != 'admin' %}
+                                                    <form method="POST" action="{{ url_for('delete_user', user_id=user.id) }}" 
+                                                          style="display: inline;" 
+                                                          onsubmit="return confirm('¿Está seguro de eliminar este usuario?')">
+                                                        <button type="submit" class="btn btn-outline-danger">
+                                                            <i class="fas fa-trash"></i> Eliminar
+                                                        </button>
+                                                    </form>
+                                                    {% endif %}
+                                                </div>
                                             </td>
                                         </tr>
                                     {% endfor %}
