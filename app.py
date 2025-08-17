@@ -175,6 +175,14 @@ def new_project():
         app.logger.info(f"Creating new project: {titulo}")
         app.logger.info(f"Image file: {imagen_file.filename if imagen_file else 'None'}")
         app.logger.info(f"Files in request: {list(request.files.keys())}")
+        app.logger.info(f"Form data: {dict(request.form)}")
+        app.logger.info(f"All files data: {[(k, v.filename if v and hasattr(v, 'filename') else str(v)) for k, v in request.files.items()]}")
+        
+        # Debug - check if imagen field is in files but empty
+        if 'imagen' in request.files:
+            imagen_debug = request.files['imagen']
+            app.logger.info(f"Imagen field exists - filename: '{imagen_debug.filename}', size: {len(imagen_debug.read()) if imagen_debug else 0}")
+            imagen_debug.seek(0)  # Reset file pointer
         
         # Create project
         imagen_blob = None
