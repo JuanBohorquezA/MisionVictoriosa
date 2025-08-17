@@ -94,20 +94,17 @@
                                         </div>
                                     </div>
                                     {% endif %}
-                                    <div class="upload-area" id="uploadArea">
-                                        <input type="file" 
-                                               class="form-control" 
-                                               id="imagen" 
-                                               name="imagen" 
-                                               accept="image/*"
-                                               style="display: none;">
+                                    <input type="file" 
+                                           class="form-control" 
+                                           id="imagen" 
+                                           name="imagen" 
+                                           accept="image/*">
+                                    
+                                    <div class="upload-area" id="uploadArea" style="margin-top: 10px;">
                                         <div class="upload-content text-center p-4">
                                             <i class="fas fa-cloud-upload-alt fa-3x text-primary mb-3"></i>
-                                            <h5>Arrastra una imagen aquí</h5>
-                                            <p class="text-muted">o</p>
-                                            <button type="button" class="btn btn-outline-primary" onclick="document.getElementById('imagen').click()">
-                                                <i class="fas fa-folder-open"></i> Seleccionar Archivo
-                                            </button>
+                                            <h5>Imagen Principal del Proyecto</h5>
+                                            <p class="text-muted">Selecciona una imagen usando el campo de arriba</p>
                                         </div>
                                     </div>
                                     <div class="form-text">
@@ -121,21 +118,18 @@
                                         <i class="fas fa-images text-primary me-2"></i>Imágenes Adicionales
                                         <span class="badge bg-info ms-2">Nuevo</span>
                                     </label>
-                                    <div class="upload-area-multiple" id="uploadAreaMultiple">
-                                        <input type="file" 
-                                               class="form-control" 
-                                               id="imagenes_adicionales" 
-                                               name="imagenes_adicionales" 
-                                               accept="image/*"
-                                               multiple
-                                               style="display: none;">
+                                    <input type="file" 
+                                           class="form-control" 
+                                           id="imagenes_adicionales" 
+                                           name="imagenes_adicionales" 
+                                           accept="image/*"
+                                           multiple>
+                                    
+                                    <div class="upload-area-multiple" id="uploadAreaMultiple" style="margin-top: 10px;">
                                         <div class="upload-content text-center p-4">
                                             <i class="fas fa-images fa-3x text-success mb-3"></i>
-                                            <h5>Arrastra múltiples imágenes aquí</h5>
-                                            <p class="text-muted">o</p>
-                                            <button type="button" class="btn btn-outline-success" onclick="document.getElementById('imagenes_adicionales').click()">
-                                                <i class="fas fa-plus"></i> Seleccionar Múltiples Imágenes
-                                            </button>
+                                            <h5>Imágenes Adicionales del Proyecto</h5>
+                                            <p class="text-muted">Selecciona múltiples imágenes usando el campo de arriba</p>
                                         </div>
                                     </div>
                                     <div class="form-text">
