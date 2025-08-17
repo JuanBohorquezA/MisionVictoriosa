@@ -232,20 +232,28 @@ def new_project():
         
         app.logger.info(f"Characteristics data - textos: {textos_nuevos}, iconos: {iconos_nuevos}, colores: {colores_nuevos}")
         
-        for i in range(len(textos_nuevos)):
-            if textos_nuevos[i].strip():
-                caracteristica = Caracteristica()
-                caracteristica.proyecto_id = proyecto.id
-                caracteristica.texto = textos_nuevos[i]
-                caracteristica.icono = iconos_nuevos[i] if i < len(iconos_nuevos) else 'fas fa-star'
-                caracteristica.color = colores_nuevos[i] if i < len(colores_nuevos) else 'primary'
-                caracteristica.orden = i
-                db.session.add(caracteristica)
-                app.logger.info(f"Added characteristic: {caracteristica.texto} with icon {caracteristica.icono} and color {caracteristica.color}")
-        
-        db.session.commit()
-        flash('Proyecto creado exitosamente.', 'success')
-        return redirect(url_for('admin'))
+        try:
+            for i in range(len(textos_nuevos)):
+                if textos_nuevos[i].strip():
+                    caracteristica = Caracteristica()
+                    caracteristica.proyecto_id = proyecto.id
+                    caracteristica.texto = textos_nuevos[i].strip()
+                    caracteristica.icono = iconos_nuevos[i] if i < len(iconos_nuevos) else 'fas fa-star'
+                    caracteristica.color = colores_nuevos[i] if i < len(colores_nuevos) else 'primary'
+                    caracteristica.orden = i
+                    db.session.add(caracteristica)
+                    app.logger.info(f"Added characteristic: {caracteristica.texto} with icon {caracteristica.icono} and color {caracteristica.color}")
+            
+            db.session.commit()
+            app.logger.info("Project and characteristics saved successfully")
+            flash('Proyecto creado exitosamente.', 'success')
+            return redirect(url_for('admin'))
+            
+        except Exception as e:
+            db.session.rollback()
+            app.logger.error(f"Error saving project: {e}")
+            flash('Error al crear el proyecto.', 'error')
+            return render_template('project_form.html', project=None, action='Crear')
     
     return render_template('project_form.html', project=None, action='Crear')
 
@@ -322,22 +330,33 @@ def edit_project(project_id):
         iconos_nuevos = request.form.getlist('caracteristica_icono_nueva')
         colores_nuevos = request.form.getlist('caracteristica_color_nueva')
         
+        app.logger.info(f"Edit project - New characteristics: textos={textos_nuevos}, iconos={iconos_nuevos}, colores={colores_nuevos}")
+        
         # Get current max order for characteristics
         max_orden = db.session.query(db.func.max(Caracteristica.orden)).filter_by(proyecto_id=project_id).scalar() or 0
         
-        for i in range(len(textos_nuevos)):
-            if textos_nuevos[i].strip():
-                caracteristica = Caracteristica()
-                caracteristica.proyecto_id = project_id
-                caracteristica.texto = textos_nuevos[i]
-                caracteristica.icono = iconos_nuevos[i] if i < len(iconos_nuevos) else 'fas fa-star'
-                caracteristica.color = colores_nuevos[i] if i < len(colores_nuevos) else 'primary'
-                caracteristica.orden = max_orden + i + 1
-                db.session.add(caracteristica)
-        
-        db.session.commit()
-        flash('Proyecto actualizado exitosamente.', 'success')
-        return redirect(url_for('admin'))
+        try:
+            for i in range(len(textos_nuevos)):
+                if textos_nuevos[i].strip():
+                    caracteristica = Caracteristica()
+                    caracteristica.proyecto_id = project_id
+                    caracteristica.texto = textos_nuevos[i].strip()
+                    caracteristica.icono = iconos_nuevos[i] if i < len(iconos_nuevos) else 'fas fa-star'
+                    caracteristica.color = colores_nuevos[i] if i < len(colores_nuevos) else 'primary'
+                    caracteristica.orden = max_orden + i + 1
+                    db.session.add(caracteristica)
+                    app.logger.info(f"Edit: Added new characteristic: {caracteristica.texto}")
+            
+            db.session.commit()
+            app.logger.info("Project edit completed successfully")
+            flash('Proyecto actualizado exitosamente.', 'success')
+            return redirect(url_for('admin'))
+            
+        except Exception as e:
+            db.session.rollback()
+            app.logger.error(f"Error updating project: {e}")
+            flash('Error al actualizar el proyecto.', 'error')
+            return redirect(url_for('edit_project', project_id=project_id))
     
     # GET request - show form with current data
     project_dict = {
