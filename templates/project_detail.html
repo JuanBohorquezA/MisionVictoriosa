@@ -48,22 +48,63 @@
             
             <!-- Project Content -->
             <div class="row">
-                <!-- Project Image -->
+                <!-- Project Images Slider -->
                 <div class="col-lg-6 mb-4">
-                    <div class="project-image-container">
+                    <div class="project-images-container">
+                        {% set all_images = [] %}
                         {% if project.imagen_base64 %}
-                            <img src="{{ project.imagen_base64 }}" 
-                                 class="img-fluid rounded shadow-lg project-main-image" 
-                                 alt="{{ project.titulo }}"
-                                 onclick="openImageModal(this.src)">
-                            <div class="image-overlay">
-                                <i class="fas fa-expand fa-2x"></i>
-                                <p class="mb-0">Click para ampliar</p>
+                            {% set _ = all_images.append({'src': project.imagen_base64, 'alt': project.titulo, 'caption': 'Imagen Principal'}) %}
+                        {% endif %}
+                        {% for recurso in project.recursos %}
+                            {% if recurso.imagen_base64 %}
+                                {% set _ = all_images.append({'src': recurso.imagen_base64, 'alt': recurso.nombre, 'caption': recurso.nombre}) %}
+                            {% endif %}
+                        {% endfor %}
+                        
+                        {% if all_images %}
+                            <!-- Main Image Display -->
+                            <div class="main-image-container">
+                                <div class="position-relative">
+                                    <img id="mainProjectImage" 
+                                         src="{{ all_images[0].src }}" 
+                                         class="img-fluid rounded shadow-lg project-main-image" 
+                                         alt="{{ all_images[0].alt }}"
+                                         onclick="openImageModal(this.src, '{{ all_images[0].caption }}')">
+                                    <div class="image-overlay">
+                                        <i class="fas fa-expand fa-2x"></i>
+                                        <p class="mb-0">Click para ampliar</p>
+                                    </div>
+                                    {% if all_images|length > 1 %}
+                                        <button class="slider-btn slider-btn-prev" onclick="previousImage()">
+                                            <i class="fas fa-chevron-left"></i>
+                                        </button>
+                                        <button class="slider-btn slider-btn-next" onclick="nextImage()">
+                                            <i class="fas fa-chevron-right"></i>
+                                        </button>
+                                    {% endif %}
+                                </div>
+                                <div class="image-caption mt-2 text-center">
+                                    <small class="text-muted" id="imageCaption">{{ all_images[0].caption }}</small>
+                                </div>
                             </div>
+                            
+                            <!-- Thumbnail Navigation -->
+                            {% if all_images|length > 1 %}
+                            <div class="thumbnails-container mt-3">
+                                <div class="thumbnails-scroll">
+                                    {% for image in all_images %}
+                                    <div class="thumbnail-item {% if loop.first %}active{% endif %}" 
+                                         onclick="showImage({{ loop.index0 }})"
+                                        <img src="{{ image.src }}" alt="{{ image.alt }}" class="thumbnail-img">
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endif %}
                         {% else %}
                             <div class="no-image-placeholder">
                                 <i class="fas fa-image fa-5x text-muted mb-3"></i>
-                                <h5 class="text-muted">Sin imagen disponible</h5>
+                                <h5 class="text-muted">Sin imágenes disponibles</h5>
                             </div>
                         {% endif %}
                     </div>
@@ -138,27 +179,131 @@
     </div>
 </div>
 
-<!-- Image Modal -->
+<!-- Enhanced Image Modal with Navigation -->
 <div class="modal fade" id="imageModal" tabindex="-1">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">{{ project.titulo }}</h5>
+                <h5 class="modal-title" id="modalTitle">{{ project.titulo }}</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body p-0">
+            <div class="modal-body p-0 position-relative">
                 <img id="modalImage" src="" class="img-fluid w-100" alt="{{ project.titulo }}">
+                
+                <!-- Modal Navigation Buttons -->
+                <button class="modal-nav-btn modal-nav-prev" onclick="previousModalImage()" id="modalPrevBtn">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <button class="modal-nav-btn modal-nav-next" onclick="nextModalImage()" id="modalNextBtn">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+                
+                <!-- Image Counter -->
+                <div class="image-counter">
+                    <span id="imageCounter">1 / 1</span>
+                </div>
+            </div>
+            <div class="modal-footer justify-content-center">
+                <small class="text-muted" id="modalCaption">Imagen del proyecto</small>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-function openImageModal(imageSrc) {
-    document.getElementById('modalImage').src = imageSrc;
+// Store all images data
+const allImages = [
+    {% if project.imagen_base64 %}
+        {src: {{ project.imagen_base64|tojson }}, alt: {{ project.titulo|tojson }}, caption: 'Imagen Principal'}{% if project.recursos %},{% endif %}
+    {% endif %}
+    {% for recurso in project.recursos %}
+        {% if recurso.imagen_base64 %}
+            {src: {{ recurso.imagen_base64|tojson }}, alt: {{ recurso.nombre|tojson }}, caption: {{ recurso.nombre|tojson }}}{% if not loop.last %},{% endif %}
+        {% endif %}
+    {% endfor %}
+];
+
+let currentImageIndex = 0;
+
+// Main slider functions
+function showImage(index) {
+    if (index < 0 || index >= allImages.length) return;
+    
+    currentImageIndex = index;
+    const image = allImages[index];
+    
+    // Update main image
+    document.getElementById('mainProjectImage').src = image.src;
+    document.getElementById('imageCaption').textContent = image.caption;
+    
+    // Update thumbnails
+    document.querySelectorAll('.thumbnail-item').forEach((thumb, i) => {
+        thumb.classList.toggle('active', i === index);
+    });
+}
+
+function nextImage() {
+    const nextIndex = (currentImageIndex + 1) % allImages.length;
+    showImage(nextIndex);
+}
+
+function previousImage() {
+    const prevIndex = (currentImageIndex - 1 + allImages.length) % allImages.length;
+    showImage(prevIndex);
+}
+
+// Modal functions
+function openImageModal(imageSrc, caption) {
+    // Find the index of the clicked image
+    const imageIndex = allImages.findIndex(img => img.src === imageSrc);
+    currentImageIndex = imageIndex >= 0 ? imageIndex : 0;
+    
+    updateModalImage();
     var imageModal = new bootstrap.Modal(document.getElementById('imageModal'));
     imageModal.show();
 }
+
+function updateModalImage() {
+    if (allImages.length === 0) return;
+    
+    const image = allImages[currentImageIndex];
+    document.getElementById('modalImage').src = image.src;
+    document.getElementById('modalCaption').textContent = image.caption;
+    document.getElementById('imageCounter').textContent = `${currentImageIndex + 1} / ${allImages.length}`;
+    
+    // Hide navigation buttons if only one image
+    const prevBtn = document.getElementById('modalPrevBtn');
+    const nextBtn = document.getElementById('modalNextBtn');
+    if (allImages.length <= 1) {
+        prevBtn.style.display = 'none';
+        nextBtn.style.display = 'none';
+    } else {
+        prevBtn.style.display = 'block';
+        nextBtn.style.display = 'block';
+    }
+}
+
+function nextModalImage() {
+    currentImageIndex = (currentImageIndex + 1) % allImages.length;
+    updateModalImage();
+}
+
+function previousModalImage() {
+    currentImageIndex = (currentImageIndex - 1 + allImages.length) % allImages.length;
+    updateModalImage();
+}
+
+// Keyboard navigation
+document.addEventListener('keydown', function(e) {
+    const modal = document.getElementById('imageModal');
+    if (modal.classList.contains('show')) {
+        if (e.key === 'ArrowRight') {
+            nextModalImage();
+        } else if (e.key === 'ArrowLeft') {
+            previousModalImage();
+        }
+    }
+});
 </script>
 
 <style>
@@ -181,7 +326,123 @@ function openImageModal(imageSrc) {
     transition: transform 0.3s ease;
 }
 
-.project-image-container:hover .project-main-image {
+/* Slider Styles */
+.slider-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 45px;
+    height: 45px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 10;
+}
+
+.slider-btn:hover {
+    background: rgba(0, 0, 0, 0.9);
+    transform: translateY(-50%) scale(1.1);
+}
+
+.slider-btn-prev {
+    left: 15px;
+}
+
+.slider-btn-next {
+    right: 15px;
+}
+
+/* Thumbnails */
+.thumbnails-container {
+    max-width: 100%;
+}
+
+.thumbnails-scroll {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    padding: 10px 0;
+    scrollbar-width: thin;
+}
+
+.thumbnail-item {
+    flex-shrink: 0;
+    width: 80px;
+    height: 60px;
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 3px solid transparent;
+}
+
+.thumbnail-item.active {
+    border-color: var(--primary-blue);
+    transform: scale(1.05);
+}
+
+.thumbnail-item:hover {
+    transform: scale(1.1);
+    border-color: var(--light-blue);
+}
+
+.thumbnail-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Modal Styles */
+.modal-nav-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 1050;
+}
+
+.modal-nav-btn:hover {
+    background: rgba(0, 0, 0, 1);
+    transform: translateY(-50%) scale(1.1);
+}
+
+.modal-nav-prev {
+    left: 20px;
+}
+
+.modal-nav-next {
+    right: 20px;
+}
+
+.image-counter {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 20px;
+    font-size: 14px;
+    z-index: 1050;
+}
+
+.project-images-container:hover .project-main-image {
     transform: scale(1.05);
 }
 
