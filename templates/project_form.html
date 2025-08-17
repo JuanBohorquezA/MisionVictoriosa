@@ -168,6 +168,75 @@
                                 </div>
                                 {% endif %}
                                 
+                                <!-- Características del Proyecto -->
+                                <div class="form-group mb-4">
+                                    <label class="form-label fw-bold">
+                                        <i class="fas fa-star text-primary me-2"></i>Características del Proyecto
+                                        <span class="badge bg-success ms-2">Nuevo</span>
+                                    </label>
+                                    <p class="text-muted small mb-3">
+                                        <i class="fas fa-info-circle"></i> Añade características destacadas que describan los beneficios y aspectos únicos del proyecto
+                                    </p>
+                                    
+                                    <!-- Características existentes -->
+                                    <div id="caracteristicas-container">
+                                        {% if project and project.caracteristicas %}
+                                            {% for caracteristica in project.caracteristicas %}
+                                            <div class="caracteristica-item border rounded p-3 mb-3 bg-light">
+                                                <div class="row align-items-center">
+                                                    <div class="col-md-1">
+                                                        <div class="text-center">
+                                                            <i class="{{ caracteristica.icono }} text-{{ caracteristica.color }} fa-2x"></i>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-5">
+                                                        <input type="hidden" name="caracteristica_id" value="{{ caracteristica.id }}">
+                                                        <input type="text" class="form-control" name="caracteristica_texto" value="{{ caracteristica.texto }}" placeholder="Texto de la característica">
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <select class="form-select" name="caracteristica_icono">
+                                                            <option value="fas fa-star" {% if caracteristica.icono == 'fas fa-star' %}selected{% endif %}>⭐ Estrella</option>
+                                                            <option value="fas fa-heart" {% if caracteristica.icono == 'fas fa-heart' %}selected{% endif %}>❤️ Corazón</option>
+                                                            <option value="fas fa-users" {% if caracteristica.icono == 'fas fa-users' %}selected{% endif %}>👥 Personas</option>
+                                                            <option value="fas fa-leaf" {% if caracteristica.icono == 'fas fa-leaf' %}selected{% endif %}>🍃 Sostenible</option>
+                                                            <option value="fas fa-lightbulb" {% if caracteristica.icono == 'fas fa-lightbulb' %}selected{% endif %}>💡 Innovación</option>
+                                                            <option value="fas fa-home" {% if caracteristica.icono == 'fas fa-home' %}selected{% endif %}>🏠 Hogar</option>
+                                                            <option value="fas fa-graduation-cap" {% if caracteristica.icono == 'fas fa-graduation-cap' %}selected{% endif %}>🎓 Educación</option>
+                                                            <option value="fas fa-medkit" {% if caracteristica.icono == 'fas fa-medkit' %}selected{% endif %}>🏥 Salud</option>
+                                                            <option value="fas fa-seedling" {% if caracteristica.icono == 'fas fa-seedling' %}selected{% endif %}>🌱 Crecimiento</option>
+                                                            <option value="fas fa-handshake" {% if caracteristica.icono == 'fas fa-handshake' %}selected{% endif %}>🤝 Colaboración</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-md-2">
+                                                        <select class="form-select" name="caracteristica_color">
+                                                            <option value="primary" {% if caracteristica.color == 'primary' %}selected{% endif %}>🔵 Azul</option>
+                                                            <option value="success" {% if caracteristica.color == 'success' %}selected{% endif %}>🟢 Verde</option>
+                                                            <option value="warning" {% if caracteristica.color == 'warning' %}selected{% endif %}>🟡 Amarillo</option>
+                                                            <option value="info" {% if caracteristica.color == 'info' %}selected{% endif %}>🔵 Ciano</option>
+                                                            <option value="danger" {% if caracteristica.color == 'danger' %}selected{% endif %}>🔴 Rojo</option>
+                                                            <option value="secondary" {% if caracteristica.color == 'secondary' %}selected{% endif %}>⚫ Gris</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-md-1">
+                                                        <button type="button" class="btn btn-outline-danger btn-sm" onclick="eliminarCaracteristica(this, {{ caracteristica.id }})">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            {% endfor %}
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <!-- Botón para añadir característica -->
+                                    <button type="button" class="btn btn-outline-primary btn-sm" onclick="añadirCaracteristica()">
+                                        <i class="fas fa-plus"></i> Añadir Característica
+                                    </button>
+                                    
+                                    <!-- Características a eliminar (hidden inputs) -->
+                                    <div id="caracteristicas-eliminar"></div>
+                                </div>
+                                
                                 <!-- Botones de Acción -->
                                 <div class="form-actions d-flex justify-content-between align-items-center mt-5">
                                     <a href="{{ url_for('admin') }}" class="btn btn-outline-secondary btn-lg">
@@ -627,6 +696,98 @@ function openImageModal(imageSrc) {
     document.getElementById('modalImage').src = imageSrc;
     var imageModal = new bootstrap.Modal(document.getElementById('imageModal'));
     imageModal.show();
+}
+
+// Función para añadir nueva característica
+function añadirCaracteristica() {
+    const container = document.getElementById('caracteristicas-container');
+    const caracteristicaCount = container.children.length;
+    
+    const nuevaCaracteristica = document.createElement('div');
+    nuevaCaracteristica.className = 'caracteristica-item border rounded p-3 mb-3 bg-light';
+    nuevaCaracteristica.innerHTML = `
+        <div class="row align-items-center">
+            <div class="col-md-1">
+                <div class="text-center">
+                    <i class="fas fa-star text-primary fa-2x"></i>
+                </div>
+            </div>
+            <div class="col-md-5">
+                <input type="text" class="form-control" name="caracteristica_texto_nueva" placeholder="Ej: Impacto positivo en la comunidad" required>
+            </div>
+            <div class="col-md-3">
+                <select class="form-select" name="caracteristica_icono_nueva" onchange="actualizarIconoPreview(this)">
+                    <option value="fas fa-star">⭐ Estrella</option>
+                    <option value="fas fa-heart">❤️ Corazón</option>
+                    <option value="fas fa-users">👥 Personas</option>
+                    <option value="fas fa-leaf">🍃 Sostenible</option>
+                    <option value="fas fa-lightbulb">💡 Innovación</option>
+                    <option value="fas fa-home">🏠 Hogar</option>
+                    <option value="fas fa-graduation-cap">🎓 Educación</option>
+                    <option value="fas fa-medkit">🏥 Salud</option>
+                    <option value="fas fa-seedling">🌱 Crecimiento</option>
+                    <option value="fas fa-handshake">🤝 Colaboración</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <select class="form-select" name="caracteristica_color_nueva" onchange="actualizarColorPreview(this)">
+                    <option value="primary">🔵 Azul</option>
+                    <option value="success">🟢 Verde</option>
+                    <option value="warning">🟡 Amarillo</option>
+                    <option value="info">🔵 Ciano</option>
+                    <option value="danger">🔴 Rojo</option>
+                    <option value="secondary">⚫ Gris</option>
+                </select>
+            </div>
+            <div class="col-md-1">
+                <button type="button" class="btn btn-outline-danger btn-sm" onclick="eliminarCaracteristicaNueva(this)">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        </div>
+    `;
+    
+    container.appendChild(nuevaCaracteristica);
+}
+
+// Función para eliminar característica nueva
+function eliminarCaracteristicaNueva(button) {
+    const caracteristicaItem = button.closest('.caracteristica-item');
+    caracteristicaItem.remove();
+}
+
+// Función para eliminar característica existente
+function eliminarCaracteristica(button, caracteristicaId) {
+    const caracteristicaItem = button.closest('.caracteristica-item');
+    
+    // Añadir input hidden para marcar como eliminada
+    const eliminarContainer = document.getElementById('caracteristicas-eliminar');
+    const hiddenInput = document.createElement('input');
+    hiddenInput.type = 'hidden';
+    hiddenInput.name = 'caracteristica_eliminar';
+    hiddenInput.value = caracteristicaId;
+    eliminarContainer.appendChild(hiddenInput);
+    
+    // Remover del DOM
+    caracteristicaItem.remove();
+}
+
+// Función para actualizar preview de icono
+function actualizarIconoPreview(select) {
+    const caracteristicaItem = select.closest('.caracteristica-item');
+    const iconoPreview = caracteristicaItem.querySelector('i');
+    const colorClass = iconoPreview.className.match(/text-(\w+)/)?.[1] || 'primary';
+    
+    iconoPreview.className = `${select.value} text-${colorClass} fa-2x`;
+}
+
+// Función para actualizar preview de color
+function actualizarColorPreview(select) {
+    const caracteristicaItem = select.closest('.caracteristica-item');
+    const iconoPreview = caracteristicaItem.querySelector('i');
+    const iconoClasses = iconoPreview.className.replace(/text-\w+/, '');
+    
+    iconoPreview.className = `${iconoClasses} text-${select.value}`;
 }
 </script>
 

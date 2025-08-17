@@ -114,6 +114,11 @@ def index():
             })
         project_dict['todas_imagenes'].extend(project_dict['recursos'])
         
+        # Get project characteristics for the index page
+        from models import Caracteristica
+        caracteristicas = Caracteristica.query.filter_by(proyecto_id=project.id).order_by(Caracteristica.orden, Caracteristica.id).limit(3).all()
+        project_dict['caracteristicas'] = caracteristicas
+        
         projects_with_images.append(project_dict)
     
     is_authenticated = 'user_id' in session
@@ -165,7 +170,7 @@ def admin():
 def new_project():
     """Create new project"""
     if request.method == 'POST':
-        from models import Proyecto, Recurso
+        from models import Proyecto, Recurso, Caracteristica
         
         titulo = request.form['titulo']
         descripcion = request.form['descripcion']
@@ -217,6 +222,24 @@ def new_project():
                     db.session.add(recurso)
                     orden += 1
         
+        # Handle characteristics
+        from models import Caracteristica
+        
+        # Get new characteristics
+        textos_nuevos = request.form.getlist('caracteristica_texto_nueva')
+        iconos_nuevos = request.form.getlist('caracteristica_icono_nueva')
+        colores_nuevos = request.form.getlist('caracteristica_color_nueva')
+        
+        for i in range(len(textos_nuevos)):
+            if textos_nuevos[i].strip():
+                caracteristica = Caracteristica()
+                caracteristica.proyecto_id = proyecto.id
+                caracteristica.texto = textos_nuevos[i]
+                caracteristica.icono = iconos_nuevos[i] if i < len(iconos_nuevos) else 'fas fa-star'
+                caracteristica.color = colores_nuevos[i] if i < len(colores_nuevos) else 'primary'
+                caracteristica.orden = i
+                db.session.add(caracteristica)
+        
         db.session.commit()
         flash('Proyecto creado exitosamente.', 'success')
         return redirect(url_for('admin'))
@@ -267,6 +290,46 @@ def edit_project(project_id):
                         db.session.add(recurso)
                         orden += 1
         
+        # Handle characteristics - existing ones
+        caracteristicas_ids = request.form.getlist('caracteristica_id')
+        caracteristicas_textos = request.form.getlist('caracteristica_texto')
+        caracteristicas_iconos = request.form.getlist('caracteristica_icono')
+        caracteristicas_colores = request.form.getlist('caracteristica_color')
+        
+        # Update existing characteristics
+        for i in range(len(caracteristicas_ids)):
+            caracteristica_id = caracteristicas_ids[i]
+            caracteristica = Caracteristica.query.get(caracteristica_id)
+            if caracteristica:
+                caracteristica.texto = caracteristicas_textos[i] if i < len(caracteristicas_textos) else caracteristica.texto
+                caracteristica.icono = caracteristicas_iconos[i] if i < len(caracteristicas_iconos) else caracteristica.icono
+                caracteristica.color = caracteristicas_colores[i] if i < len(caracteristicas_colores) else caracteristica.color
+        
+        # Handle characteristics to delete
+        caracteristicas_eliminar = request.form.getlist('caracteristica_eliminar')
+        for caracteristica_id in caracteristicas_eliminar:
+            caracteristica = Caracteristica.query.get(caracteristica_id)
+            if caracteristica:
+                db.session.delete(caracteristica)
+        
+        # Handle new characteristics
+        textos_nuevos = request.form.getlist('caracteristica_texto_nueva')
+        iconos_nuevos = request.form.getlist('caracteristica_icono_nueva')
+        colores_nuevos = request.form.getlist('caracteristica_color_nueva')
+        
+        # Get current max order for characteristics
+        max_orden = db.session.query(db.func.max(Caracteristica.orden)).filter_by(proyecto_id=project_id).scalar() or 0
+        
+        for i in range(len(textos_nuevos)):
+            if textos_nuevos[i].strip():
+                caracteristica = Caracteristica()
+                caracteristica.proyecto_id = project_id
+                caracteristica.texto = textos_nuevos[i]
+                caracteristica.icono = iconos_nuevos[i] if i < len(iconos_nuevos) else 'fas fa-star'
+                caracteristica.color = colores_nuevos[i] if i < len(colores_nuevos) else 'primary'
+                caracteristica.orden = max_orden + i + 1
+                db.session.add(caracteristica)
+        
         db.session.commit()
         flash('Proyecto actualizado exitosamente.', 'success')
         return redirect(url_for('admin'))
@@ -301,6 +364,11 @@ def edit_project(project_id):
                 'imagen_base64': f"data:image/jpeg;base64,{resource_data}",
                 'orden': recurso.orden
             })
+    
+    # Get existing characteristics
+    from models import Caracteristica
+    caracteristicas = Caracteristica.query.filter_by(proyecto_id=project_id).order_by(Caracteristica.orden, Caracteristica.id).all()
+    project_dict['caracteristicas'] = caracteristicas
     
     return render_template('project_form.html', project=project_dict, action='Editar')
 
@@ -471,6 +539,11 @@ def project_detail(project_id):
             'orden': -1
         })
     project_dict['todas_imagenes'].extend(project_dict['recursos'])
+    
+    # Get project characteristics
+    from models import Caracteristica
+    caracteristicas = Caracteristica.query.filter_by(proyecto_id=project_id).order_by(Caracteristica.orden, Caracteristica.id).all()
+    project_dict['caracteristicas'] = caracteristicas
     
     is_authenticated = 'user_id' in session
     return render_template('project_detail.html', project=project_dict, is_authenticated=is_authenticated)

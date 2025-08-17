@@ -109,37 +109,23 @@
                         </div>
                         
                         <!-- Project Features -->
+                        {% if project.caracteristicas %}
                         <div class="project-features mt-4">
                             <h5 class="text-secondary mb-3">
                                 <i class="fas fa-star"></i> Características
                             </h5>
                             <div class="row">
+                                {% for caracteristica in project.caracteristicas %}
                                 <div class="col-md-6 mb-3">
                                     <div class="feature-item">
-                                        <i class="fas fa-check-circle text-success me-2"></i>
-                                        <span>Proyecto verificado</span>
+                                        <i class="{{ caracteristica.icono }} text-{{ caracteristica.color }} me-2"></i>
+                                        <span>{{ caracteristica.texto }}</span>
                                     </div>
                                 </div>
-                                <div class="col-md-6 mb-3">
-                                    <div class="feature-item">
-                                        <i class="fas fa-users text-info me-2"></i>
-                                        <span>Impacto comunitario</span>
-                                    </div>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <div class="feature-item">
-                                        <i class="fas fa-leaf text-success me-2"></i>
-                                        <span>Sostenible</span>
-                                    </div>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <div class="feature-item">
-                                        <i class="fas fa-lightbulb text-warning me-2"></i>
-                                        <span>Innovador</span>
-                                    </div>
-                                </div>
+                                {% endfor %}
                             </div>
                         </div>
+                        {% endif %}
                     </div>
                 </div>
             </div>

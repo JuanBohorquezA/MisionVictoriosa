@@ -25,6 +25,8 @@ class Proyecto(db.Model):
     
     # Relationship with recursos
     recursos = db.relationship('Recurso', backref='proyecto', cascade='all, delete-orphan')
+    # Relationship with caracteristicas
+    caracteristicas = db.relationship('Caracteristica', backref='proyecto', cascade='all, delete-orphan')
     
     @property
     def imagen_base64(self):
@@ -75,3 +77,18 @@ class Recurso(db.Model):
         if self.contenido:
             return f"data:image/jpeg;base64,{base64.b64encode(self.contenido).decode('utf-8')}"
         return None
+
+
+class Caracteristica(db.Model):
+    __tablename__ = 'caracteristicas'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    proyecto_id = db.Column(db.Integer, db.ForeignKey('proyectos.id'), nullable=False)
+    texto = db.Column(db.String(100), nullable=False)
+    icono = db.Column(db.String(50), nullable=False, default='fas fa-star')
+    color = db.Column(db.String(20), nullable=False, default='primary')
+    orden = db.Column(db.Integer, default=0)
+    fecha_creacion = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    def __repr__(self):
+        return f'<Caracteristica {self.texto}>'

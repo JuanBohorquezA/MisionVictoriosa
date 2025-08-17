@@ -107,6 +107,18 @@
                             <div class="card-body">
                                 <h5 class="card-title text-primary">{{ project.titulo }}</h5>
                                 <p class="card-text">{{ project.descripcion[:120] }}{% if project.descripcion|length > 120 %}...{% endif %}</p>
+                                
+                                <!-- Características del proyecto -->
+                                {% if project.caracteristicas %}
+                                <div class="project-features mb-3">
+                                    {% for caracteristica in project.caracteristicas %}
+                                    <span class="badge bg-{{ caracteristica.color }} me-1 mb-1">
+                                        <i class="{{ caracteristica.icono }}"></i> {{ caracteristica.texto }}
+                                    </span>
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                                
                                 <div class="card-actions mt-auto">
                                     <span class="btn btn-outline-primary btn-sm">
                                         <i class="fas fa-eye"></i> Ver Detalles
