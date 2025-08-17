@@ -176,11 +176,10 @@ def new_project():
         if imagen_file and imagen_file.filename:
             imagen_blob = imagen_file.read()
         
-        proyecto = Proyecto(
-            titulo=titulo,
-            descripcion=descripcion,
-            imagen=imagen_blob
-        )
+        proyecto = Proyecto()
+        proyecto.titulo = titulo
+        proyecto.descripcion = descripcion
+        proyecto.imagen = imagen_blob
         db.session.add(proyecto)
         db.session.flush()  # Get the ID before commit
         
@@ -191,13 +190,12 @@ def new_project():
             if imagen_adicional and imagen_adicional.filename:
                 imagen_content = imagen_adicional.read()
                 if imagen_content:  # Only save if there's actual content
-                    recurso = Recurso(
-                        proyecto_id=proyecto.id,
-                        tipo='imagen',
-                        nombre=imagen_adicional.filename,
-                        contenido=imagen_content,
-                        orden=orden
-                    )
+                    recurso = Recurso()
+                    recurso.proyecto_id = proyecto.id
+                    recurso.tipo = 'imagen'
+                    recurso.nombre = imagen_adicional.filename
+                    recurso.contenido = imagen_content
+                    recurso.orden = orden
                     db.session.add(recurso)
                     orden += 1
         
@@ -239,13 +237,12 @@ def edit_project(project_id):
                 if imagen_adicional and imagen_adicional.filename:
                     imagen_content = imagen_adicional.read()
                     if imagen_content:  # Only save if there's actual content
-                        recurso = Recurso(
-                            proyecto_id=project_id,
-                            tipo='imagen',
-                            nombre=imagen_adicional.filename,
-                            contenido=imagen_content,
-                            orden=orden
-                        )
+                        recurso = Recurso()
+                        recurso.proyecto_id = project_id
+                        recurso.tipo = 'imagen'
+                        recurso.nombre = imagen_adicional.filename
+                        recurso.contenido = imagen_content
+                        recurso.orden = orden
                         db.session.add(recurso)
                         orden += 1
         
@@ -318,7 +315,9 @@ def new_user():
         
         # Create new user
         password_hash = generate_password_hash(password)
-        usuario = Usuario(username=username, password_hash=password_hash)
+        usuario = Usuario()
+        usuario.username = username
+        usuario.password_hash = password_hash
         db.session.add(usuario)
         db.session.commit()
         
