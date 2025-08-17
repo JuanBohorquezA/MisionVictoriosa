@@ -75,6 +75,25 @@
                                         <i class="fas fa-camera text-primary me-2"></i>Imagen Principal del Proyecto
                                         {% if project %}<span class="text-muted">(opcional - mantener actual si no se selecciona)</span>{% endif %}
                                     </label>
+                                    
+                                    <!-- Mostrar imagen actual si existe -->
+                                    {% if project and project.imagen_base64 %}
+                                    <div class="current-image mb-3">
+                                        <div class="alert alert-info">
+                                            <strong><i class="fas fa-info-circle"></i> Imagen Actual:</strong>
+                                        </div>
+                                        <div class="text-center">
+                                            <img src="{{ project.imagen_base64 }}" 
+                                                 class="img-thumbnail current-project-image" 
+                                                 alt="Imagen actual del proyecto"
+                                                 style="max-height: 200px; cursor: pointer;"
+                                                 onclick="openImageModal(this.src)">
+                                            <p class="small text-muted mt-2">
+                                                <i class="fas fa-eye"></i> Click para ver en tamaño completo
+                                            </p>
+                                        </div>
+                                    </div>
+                                    {% endif %}
                                     <div class="upload-area" id="uploadArea">
                                         <input type="file" 
                                                class="form-control" 
@@ -180,10 +199,14 @@
                         <div class="card-body">
                             <div class="preview-content">
                                 <div class="preview-image mb-3" id="previewImage">
-                                    <div class="placeholder-image">
-                                        <i class="fas fa-image fa-3x text-muted"></i>
-                                        <p class="small text-muted mt-2">Imagen del proyecto</p>
-                                    </div>
+                                    {% if project and project.imagen_base64 %}
+                                        <img src="{{ project.imagen_base64 }}" alt="Imagen actual" class="img-fluid rounded">
+                                    {% else %}
+                                        <div class="placeholder-image">
+                                            <i class="fas fa-image fa-3x text-muted"></i>
+                                            <p class="small text-muted mt-2">Imagen del proyecto</p>
+                                        </div>
+                                    {% endif %}
                                 </div>
                                 <h6 class="preview-title text-primary" id="previewTitle">
                                     {% if project %}{{ project.titulo }}{% else %}Título del Proyecto{% endif %}
@@ -578,5 +601,43 @@ document.addEventListener('DOMContentLoaded', function() {
 function changeImage() {
     document.getElementById('imagen').click();
 }
+
+function openImageModal(imageSrc) {
+    document.getElementById('modalImage').src = imageSrc;
+    var imageModal = new bootstrap.Modal(document.getElementById('imageModal'));
+    imageModal.show();
+}
 </script>
+
+<!-- Image Modal -->
+<div class="modal fade" id="imageModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Vista Completa de la Imagen</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-0">
+                <img id="modalImage" src="" class="img-fluid w-100" alt="Imagen ampliada">
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.current-project-image {
+    border: 3px solid var(--primary-blue);
+    transition: transform 0.3s ease;
+}
+
+.current-project-image:hover {
+    transform: scale(1.05);
+}
+
+.current-image {
+    background: var(--light-gray);
+    border-radius: 8px;
+    padding: 1rem;
+}
+</style>
 {% endblock %}

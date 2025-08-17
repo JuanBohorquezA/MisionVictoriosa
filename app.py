@@ -260,6 +260,13 @@ def edit_project(project_id):
         'descripcion': proyecto.descripcion
     }
     
+    # Add main image if exists
+    if proyecto.imagen:
+        image_data = base64.b64encode(proyecto.imagen).decode('utf-8')
+        project_dict['imagen_base64'] = f"data:image/jpeg;base64,{image_data}"
+    else:
+        project_dict['imagen_base64'] = None
+    
     # Get existing resources
     recursos = Recurso.query.filter_by(
         proyecto_id=project_id, 
