@@ -178,9 +178,11 @@ def new_project():
         
         # Create project
         imagen_blob = None
-        if imagen_file and imagen_file.filename:
+        if imagen_file and imagen_file.filename and imagen_file.filename.strip():
             imagen_blob = imagen_file.read()
             app.logger.info(f"Main image size: {len(imagen_blob)} bytes")
+        else:
+            app.logger.info("No main image provided or empty filename")
         
         proyecto = Proyecto()
         proyecto.titulo = titulo
@@ -194,7 +196,7 @@ def new_project():
         app.logger.info(f"Additional images count: {len(imagenes_adicionales)}")
         orden = 1
         for imagen_adicional in imagenes_adicionales:
-            if imagen_adicional and imagen_adicional.filename:
+            if imagen_adicional and imagen_adicional.filename and imagen_adicional.filename.strip():
                 imagen_content = imagen_adicional.read()
                 if imagen_content:  # Only save if there's actual content
                     app.logger.info(f"Saving resource: {imagen_adicional.filename}, size: {len(imagen_content)} bytes")
@@ -231,8 +233,11 @@ def edit_project(project_id):
         proyecto.descripcion = descripcion
         
         # Update image if new one is uploaded
-        if imagen_file and imagen_file.filename:
+        if imagen_file and imagen_file.filename and imagen_file.filename.strip():
             proyecto.imagen = imagen_file.read()
+            app.logger.info(f"Updated main image, size: {len(proyecto.imagen)} bytes")
+        else:
+            app.logger.info("No new main image provided, keeping existing")
         
         # Handle new additional images
         imagenes_adicionales = request.files.getlist('imagenes_adicionales')
@@ -242,7 +247,7 @@ def edit_project(project_id):
             orden = max_orden + 1
             
             for imagen_adicional in imagenes_adicionales:
-                if imagen_adicional and imagen_adicional.filename:
+                if imagen_adicional and imagen_adicional.filename and imagen_adicional.filename.strip():
                     imagen_content = imagen_adicional.read()
                     if imagen_content:  # Only save if there's actual content
                         recurso = Recurso()
