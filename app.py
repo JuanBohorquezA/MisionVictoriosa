@@ -170,7 +170,7 @@ def admin():
 def new_project():
     """Create new project"""
     if request.method == 'POST':
-        from models import Proyecto, Recurso, Caracteristica
+        from models import Proyecto, Recurso
         
         titulo = request.form['titulo']
         descripcion = request.form['descripcion']
@@ -230,6 +230,8 @@ def new_project():
         iconos_nuevos = request.form.getlist('caracteristica_icono_nueva')
         colores_nuevos = request.form.getlist('caracteristica_color_nueva')
         
+        app.logger.info(f"Characteristics data - textos: {textos_nuevos}, iconos: {iconos_nuevos}, colores: {colores_nuevos}")
+        
         for i in range(len(textos_nuevos)):
             if textos_nuevos[i].strip():
                 caracteristica = Caracteristica()
@@ -239,6 +241,7 @@ def new_project():
                 caracteristica.color = colores_nuevos[i] if i < len(colores_nuevos) else 'primary'
                 caracteristica.orden = i
                 db.session.add(caracteristica)
+                app.logger.info(f"Added characteristic: {caracteristica.texto} with icon {caracteristica.icono} and color {caracteristica.color}")
         
         db.session.commit()
         flash('Proyecto creado exitosamente.', 'success')
@@ -255,6 +258,8 @@ def edit_project(project_id):
     proyecto = Proyecto.query.get_or_404(project_id)
     
     if request.method == 'POST':
+        from models import Caracteristica
+        
         titulo = request.form['titulo']
         descripcion = request.form['descripcion']
         imagen_file = request.files.get('imagen')

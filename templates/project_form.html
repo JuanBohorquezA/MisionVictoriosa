@@ -279,6 +279,16 @@
                                 </p>
                             </div>
                             
+                            <!-- Características Preview -->
+                            <div class="caracteristicas-preview mt-4 p-3 bg-light rounded" id="caracteristicasPreview">
+                                <h6 class="text-primary mb-3">
+                                    <i class="fas fa-star"></i> Características del Proyecto
+                                </h6>
+                                <div id="previewCaracteristicas">
+                                    <p class="text-muted small">Las características aparecerán aquí cuando las agregues</p>
+                                </div>
+                            </div>
+                            
                             <!-- Project Info -->
                             <div class="project-info mt-4 p-3 bg-light rounded">
                                 <h6 class="text-primary mb-3">
@@ -508,6 +518,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Initialize character count
     charCount.textContent = descripcionInput.value.length;
+    
+    // Initialize characteristics preview
+    actualizarPreviewCaracteristicas();
 
     // Drag and drop functionality
     uploadArea.addEventListener('dragover', function(e) {
@@ -716,7 +729,7 @@ function añadirCaracteristica() {
                 <input type="text" class="form-control" name="caracteristica_texto_nueva" placeholder="Ej: Impacto positivo en la comunidad" required>
             </div>
             <div class="col-md-3">
-                <select class="form-select" name="caracteristica_icono_nueva" onchange="actualizarIconoPreview(this)">
+                <select class="form-select" name="caracteristica_icono_nueva" onchange="actualizarIconoPreview(this); actualizarPreviewCaracteristicas();">
                     <option value="fas fa-star">⭐ Estrella</option>
                     <option value="fas fa-heart">❤️ Corazón</option>
                     <option value="fas fa-users">👥 Personas</option>
@@ -730,7 +743,7 @@ function añadirCaracteristica() {
                 </select>
             </div>
             <div class="col-md-2">
-                <select class="form-select" name="caracteristica_color_nueva" onchange="actualizarColorPreview(this)">
+                <select class="form-select" name="caracteristica_color_nueva" onchange="actualizarColorPreview(this); actualizarPreviewCaracteristicas();">
                     <option value="primary">🔵 Azul</option>
                     <option value="success">🟢 Verde</option>
                     <option value="warning">🟡 Amarillo</option>
@@ -748,12 +761,20 @@ function añadirCaracteristica() {
     `;
     
     container.appendChild(nuevaCaracteristica);
+    
+    // Add event listeners to new inputs
+    const newInput = nuevaCaracteristica.querySelector('input[name="caracteristica_texto_nueva"]');
+    newInput.addEventListener('input', actualizarPreviewCaracteristicas);
+    
+    // Update preview
+    actualizarPreviewCaracteristicas();
 }
 
 // Función para eliminar característica nueva
 function eliminarCaracteristicaNueva(button) {
     const caracteristicaItem = button.closest('.caracteristica-item');
     caracteristicaItem.remove();
+    actualizarPreviewCaracteristicas();
 }
 
 // Función para eliminar característica existente
@@ -770,6 +791,7 @@ function eliminarCaracteristica(button, caracteristicaId) {
     
     // Remover del DOM
     caracteristicaItem.remove();
+    actualizarPreviewCaracteristicas();
 }
 
 // Función para actualizar preview de icono
@@ -788,7 +810,60 @@ function actualizarColorPreview(select) {
     const iconoClasses = iconoPreview.className.replace(/text-\w+/, '');
     
     iconoPreview.className = `${iconoClasses} text-${select.value}`;
+    
+    // Update preview
+    actualizarPreviewCaracteristicas();
 }
+
+// Función para actualizar vista previa de características
+function actualizarPreviewCaracteristicas() {
+    const previewContainer = document.getElementById('previewCaracteristicas');
+    const caracteristicasContainer = document.getElementById('caracteristicas-container');
+    const caracteristicasItems = caracteristicasContainer.querySelectorAll('.caracteristica-item');
+    
+    if (caracteristicasItems.length === 0) {
+        previewContainer.innerHTML = '<p class="text-muted small">Las características aparecerán aquí cuando las agregues</p>';
+        return;
+    }
+    
+    let previewHTML = '';
+    caracteristicasItems.forEach((item, index) => {
+        const texto = item.querySelector('input[name*="texto"]')?.value || '';
+        const iconoSelect = item.querySelector('select[name*="icono"]');
+        const colorSelect = item.querySelector('select[name*="color"]');
+        const icono = iconoSelect?.value || 'fas fa-star';
+        const color = colorSelect?.value || 'primary';
+        
+        if (texto.trim()) {
+            previewHTML += `
+                <div class="caracteristica-preview-item mb-2 p-2 border rounded">
+                    <i class="${icono} text-${color} me-2"></i>
+                    <span class="small">${texto}</span>
+                </div>
+            `;
+        }
+    });
+    
+    if (previewHTML) {
+        previewContainer.innerHTML = previewHTML;
+    } else {
+        previewContainer.innerHTML = '<p class="text-muted small">Las características aparecerán aquí cuando las agregues</p>';
+    }
+}
+
+// Actualizar preview cuando se cambie el texto
+document.addEventListener('input', function(e) {
+    if (e.target.name && e.target.name.includes('caracteristica_texto')) {
+        actualizarPreviewCaracteristicas();
+    }
+});
+
+// Actualizar preview cuando se cambien los selects
+document.addEventListener('change', function(e) {
+    if (e.target.name && (e.target.name.includes('caracteristica_icono') || e.target.name.includes('caracteristica_color'))) {
+        actualizarPreviewCaracteristicas();
+    }
+});
 </script>
 
 <!-- Image Modal -->
