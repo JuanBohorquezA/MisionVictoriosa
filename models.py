@@ -1,5 +1,6 @@
 from app import db
 from datetime import datetime
+import base64
 
 
 class Usuario(db.Model):
@@ -24,6 +25,37 @@ class Proyecto(db.Model):
     
     # Relationship with recursos
     recursos = db.relationship('Recurso', backref='proyecto', cascade='all, delete-orphan')
+    
+    @property
+    def imagen_base64(self):
+        """Convert image blob to base64 for display"""
+        if self.imagen:
+            return f"data:image/jpeg;base64,{base64.b64encode(self.imagen).decode('utf-8')}"
+        return None
+    
+    @property
+    def todas_imagenes(self):
+        """Get all images for this project (main + additional resources)"""
+        imagenes = []
+        
+        # Add main image first if exists
+        if self.imagen_base64:
+            imagenes.append({
+                'imagen_base64': self.imagen_base64,
+                'nombre': 'Imagen Principal',
+                'tipo': 'principal'
+            })
+        
+        # Add additional images from recursos
+        for recurso in self.recursos:
+            if recurso.tipo == 'imagen' and recurso.imagen_base64:
+                imagenes.append({
+                    'imagen_base64': recurso.imagen_base64,
+                    'nombre': recurso.nombre,
+                    'tipo': 'adicional'
+                })
+        
+        return imagenes
 
 
 class Recurso(db.Model):
@@ -36,3 +68,10 @@ class Recurso(db.Model):
     contenido = db.Column(db.LargeBinary, nullable=False)
     orden = db.Column(db.Integer, default=0)
     fecha_creacion = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    @property
+    def imagen_base64(self):
+        """Convert image blob to base64 for display"""
+        if self.contenido:
+            return f"data:image/jpeg;base64,{base64.b64encode(self.contenido).decode('utf-8')}"
+        return None
