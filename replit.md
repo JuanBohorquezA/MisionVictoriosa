@@ -18,17 +18,20 @@ Preferred communication style: Simple, everyday language.
 
 ### Backend Architecture
 - **Framework**: Flask web framework with Python
-- **Session Management**: Flask sessions with configurable secret key
+- **Session Management**: Flask sessions with configurable secret key (fallback to development key)
 - **Authentication**: Username/password authentication with Werkzeug password hashing
 - **File Handling**: Secure filename handling for image uploads with BLOB storage
-- **Database Layer**: Raw SQLite queries with connection management utilities
+- **Database Layer**: Flask-SQLAlchemy ORM with PostgreSQL integration
+- **Migration**: Fully migrated from SQLite to PostgreSQL for production readiness
 
 ### Data Storage
-- **Database**: SQLite with two main tables:
+- **Database**: PostgreSQL with three main tables:
   - `usuarios`: User management with hashed passwords
   - `proyectos`: Project storage including BLOB image data
-- **Database Initialization**: Automatic table creation on application startup
-- **Data Seeding**: Separate seed script for creating initial admin user
+  - `recursos`: Additional project resources (multiple images per project)
+- **Database Initialization**: Automatic table creation via SQLAlchemy models
+- **Data Seeding**: Automated setup script for database and admin user creation
+- **Migration Completed**: August 16, 2025 - Full migration to PostgreSQL and Flask-SQLAlchemy
 
 ### Authentication & Authorization
 - **Authentication Method**: Session-based authentication using Flask sessions
@@ -65,8 +68,9 @@ Preferred communication style: Simple, everyday language.
 - **Font Awesome 6.0.0**: Icon library for UI enhancement
 
 ### Database
-- **SQLite**: Embedded database for development and small-scale deployment
-- **File Storage**: Local file system storage for the SQLite database file
+- **PostgreSQL**: Production-ready database with full ACID compliance
+- **Replit Integration**: Configured with Replit's PostgreSQL service
+- **Environment Variables**: DATABASE_URL, PGPORT, PGUSER, PGPASSWORD, PGDATABASE, PGHOST
 
 ### Configuration
 - **Environment Variables**: SESSION_SECRET for production security
