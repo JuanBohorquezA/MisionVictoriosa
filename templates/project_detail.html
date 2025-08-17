@@ -88,19 +88,7 @@
                                 </div>
                             </div>
                             
-                            <!-- Thumbnail Navigation -->
-                            {% if all_images|length > 1 %}
-                            <div class="thumbnails-container mt-3">
-                                <div class="thumbnails-scroll">
-                                    {% for image in all_images %}
-                                    <div class="thumbnail-item {% if loop.first %}active{% endif %}" 
-                                         onclick="showImage({{ loop.index0 }})"
-                                        <img src="{{ image.src }}" alt="{{ image.alt }}" class="thumbnail-img">
-                                    </div>
-                                    {% endfor %}
-                                </div>
-                            </div>
-                            {% endif %}
+
                         {% else %}
                             <div class="no-image-placeholder">
                                 <i class="fas fa-image fa-5x text-muted mb-3"></i>
@@ -218,7 +206,7 @@ const allImages = [
     {% endif %}
     {% for recurso in project.recursos %}
         {% if recurso.imagen_base64 %}
-            {src: {{ recurso.imagen_base64|tojson }}, alt: {{ recurso.nombre|tojson }}, caption: {{ recurso.nombre|tojson }}}{% if not loop.last %},{% endif %}
+            {src: {{ recurso.imagen_base64|tojson }}, alt: 'Imagen del proyecto', caption: 'Imagen {{ loop.index }}'}{% if not loop.last %},{% endif %}
         {% endif %}
     {% endfor %}
 ];
@@ -236,10 +224,7 @@ function showImage(index) {
     document.getElementById('mainProjectImage').src = image.src;
     document.getElementById('imageCaption').textContent = image.caption;
     
-    // Update thumbnails
-    document.querySelectorAll('.thumbnail-item').forEach((thumb, i) => {
-        thumb.classList.toggle('active', i === index);
-    });
+
 }
 
 function nextImage() {
@@ -358,45 +343,7 @@ document.addEventListener('keydown', function(e) {
     right: 15px;
 }
 
-/* Thumbnails */
-.thumbnails-container {
-    max-width: 100%;
-}
 
-.thumbnails-scroll {
-    display: flex;
-    gap: 10px;
-    overflow-x: auto;
-    padding: 10px 0;
-    scrollbar-width: thin;
-}
-
-.thumbnail-item {
-    flex-shrink: 0;
-    width: 80px;
-    height: 60px;
-    border-radius: 8px;
-    overflow: hidden;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    border: 3px solid transparent;
-}
-
-.thumbnail-item.active {
-    border-color: var(--primary-blue);
-    transform: scale(1.05);
-}
-
-.thumbnail-item:hover {
-    transform: scale(1.1);
-    border-color: var(--light-blue);
-}
-
-.thumbnail-img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
 
 /* Modal Styles */
 .modal-nav-btn {
