@@ -171,10 +171,16 @@ def new_project():
         descripcion = request.form['descripcion']
         imagen_file = request.files.get('imagen')
         
+        # Debug logging
+        app.logger.info(f"Creating new project: {titulo}")
+        app.logger.info(f"Image file: {imagen_file.filename if imagen_file else 'None'}")
+        app.logger.info(f"Files in request: {list(request.files.keys())}")
+        
         # Create project
         imagen_blob = None
         if imagen_file and imagen_file.filename:
             imagen_blob = imagen_file.read()
+            app.logger.info(f"Main image size: {len(imagen_blob)} bytes")
         
         proyecto = Proyecto()
         proyecto.titulo = titulo
@@ -185,11 +191,13 @@ def new_project():
         
         # Handle multiple additional images
         imagenes_adicionales = request.files.getlist('imagenes_adicionales')
+        app.logger.info(f"Additional images count: {len(imagenes_adicionales)}")
         orden = 1
         for imagen_adicional in imagenes_adicionales:
             if imagen_adicional and imagen_adicional.filename:
                 imagen_content = imagen_adicional.read()
                 if imagen_content:  # Only save if there's actual content
+                    app.logger.info(f"Saving resource: {imagen_adicional.filename}, size: {len(imagen_content)} bytes")
                     recurso = Recurso()
                     recurso.proyecto_id = proyecto.id
                     recurso.tipo = 'imagen'
