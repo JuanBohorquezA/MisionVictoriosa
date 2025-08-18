@@ -465,33 +465,6 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Debug form submission
-    const form = document.getElementById('projectForm');
-    form.addEventListener('submit', function(e) {
-        console.log('=== FORM SUBMISSION DEBUG ===');
-        
-        const formData = new FormData(form);
-        console.log('Form fields:');
-        for (let [key, value] of formData.entries()) {
-            if (value instanceof File) {
-                console.log(`${key}: File - name: "${value.name}", size: ${value.size}`);
-            } else {
-                console.log(`${key}: ${value}`);
-            }
-        }
-        
-        // Check input fields specifically
-        const imagenInput = document.getElementById('imagen');
-        const imagenesAdicionalesInput = document.getElementById('imagenes_adicionales');
-        
-        console.log('Input fields check:');
-        console.log('Imagen input:', imagenInput ? 'Found' : 'NOT FOUND');
-        console.log('Imagen files:', imagenInput?.files ? imagenInput.files.length : 'No files');
-        console.log('Imagenes adicionales input:', imagenesAdicionalesInput ? 'Found' : 'NOT FOUND');
-        console.log('Imagenes adicionales files:', imagenesAdicionalesInput?.files ? imagenesAdicionalesInput.files.length : 'No files');
-        
-        console.log('=== END FORM DEBUG ===');
-    });
     const tituloInput = document.getElementById('titulo');
     const descripcionInput = document.getElementById('descripcion');
     const imagenInput = document.getElementById('imagen');

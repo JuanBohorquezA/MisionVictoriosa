@@ -172,9 +172,17 @@ def new_project():
     if request.method == 'POST':
         from models import Proyecto, Recurso
         
-        titulo = request.form['titulo']
-        descripcion = request.form['descripcion']
+        app.logger.info("=== NEW PROJECT POST REQUEST ===")
+        app.logger.info(f"Form data keys: {list(request.form.keys())}")
+        app.logger.info(f"Files keys: {list(request.files.keys())}")
+        
+        titulo = request.form.get('titulo', '').strip()
+        descripcion = request.form.get('descripcion', '').strip()
         imagen_file = request.files.get('imagen')
+        
+        if not titulo or not descripcion:
+            flash('Título y descripción son obligatorios.', 'error')
+            return render_template('project_form.html', project=None, action='Crear')
         
         # Debug logging
         app.logger.info(f"Creating new project: {titulo}")
@@ -268,9 +276,18 @@ def edit_project(project_id):
     if request.method == 'POST':
         from models import Caracteristica
         
-        titulo = request.form['titulo']
-        descripcion = request.form['descripcion']
+        app.logger.info("=== EDIT PROJECT POST REQUEST ===")
+        app.logger.info(f"Project ID: {project_id}")
+        app.logger.info(f"Form data keys: {list(request.form.keys())}")
+        app.logger.info(f"Files keys: {list(request.files.keys())}")
+        
+        titulo = request.form.get('titulo', '').strip()
+        descripcion = request.form.get('descripcion', '').strip()
         imagen_file = request.files.get('imagen')
+        
+        if not titulo or not descripcion:
+            flash('Título y descripción son obligatorios.', 'error')
+            return redirect(url_for('edit_project', project_id=project_id))
         
         # Update project data
         proyecto.titulo = titulo
