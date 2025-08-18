@@ -33,11 +33,42 @@ app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
 # initialize the app with the extension, flask-sqlalchemy >= 3.0.x
 db.init_app(app)
 
+def initialize_database():
+    """Inicializa la base de datos y crea usuario admin si no existe"""
+    try:
+        # Crear todas las tablas
+        db.create_all()
+        app.logger.info("✓ Tablas de base de datos creadas/verificadas")
+        
+        # Importar modelos después de crear las tablas
+        from models import Usuario
+        
+        # Verificar si existe el usuario admin
+        admin_user = Usuario.query.filter_by(username='admin').first()
+        
+        if not admin_user:
+            # Crear usuario administrador
+            password_hash = generate_password_hash('admin123')
+            admin = Usuario(username='admin', password_hash=password_hash)
+            db.session.add(admin)
+            db.session.commit()
+            
+            app.logger.info("✓ Usuario administrador creado")
+            app.logger.info("  Username: admin")
+            app.logger.info("  Password: admin123")
+        else:
+            app.logger.info("✓ Usuario administrador ya existe")
+            
+    except Exception as e:
+        app.logger.error(f"Error inicializando la base de datos: {str(e)}")
+        raise
+
 with app.app_context():
     # Make sure to import the models here or their tables won't be created
     import models  # noqa: F401
-
-    db.create_all()
+    
+    # Ejecutar inicialización automática
+    initialize_database()
 
 def login_required(f):
     """Decorator to require login for protected routes"""
