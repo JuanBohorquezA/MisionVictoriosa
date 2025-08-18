@@ -49,7 +49,9 @@ def initialize_database():
         if not admin_user:
             # Crear usuario administrador
             password_hash = generate_password_hash('admin123')
-            admin = Usuario(username='admin', password_hash=password_hash)
+            admin = Usuario()
+            admin.username = 'admin'
+            admin.password_hash = password_hash
             db.session.add(admin)
             db.session.commit()
             

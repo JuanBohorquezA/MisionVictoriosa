@@ -49,7 +49,8 @@ class Proyecto(db.Model):
             })
         
         # Add additional images from recursos
-        for recurso in self.recursos:
+        recursos_list = list(self.recursos)
+        for recurso in recursos_list:
             if recurso.tipo == 'imagen' and recurso.imagen_base64:
                 imagenes.append({
                     'imagen_base64': recurso.imagen_base64,
